@@ -4,18 +4,18 @@ public class Main {
         TaskManager taskManager = new TaskManager();
 
         // + две задачи
-        taskManager.makeTask("Погулять с детьми", "Давно не были на ВДНХ");
-        taskManager.makeTask("Приготовить ужин", "Нужны лук, помидоры, картошка, говядина, сметана");
+        taskManager.addTask("Погулять с детьми", "Давно не были на ВДНХ");
+        taskManager.addTask("Приготовить ужин", "Нужны лук, помидоры, картошка, говядина, сметана");
 
         // + эпик с двумя задачами
-        taskManager.makeEpic("Поменять колёса", "На этой неделе надо успеть");
-        taskManager.makeSubtask(taskManager.idCounter, "У Валерия насос забрать", "");
-        taskManager.makeSubtask(taskManager.idCounter-1, "Валерий посмотрит визг потом",
+        taskManager.addEpic("Поменять колёса", "На этой неделе надо успеть");
+        taskManager.addSubtask(taskManager.idCounter, "У Валерия насос забрать", "");
+        taskManager.addSubtask(taskManager.idCounter-1, "Валерий посмотрит визг потом",
                 "Какой-то визг из под колес то появляется, то пропадает.");
 
         // + эпик с одной подзадачей
-        taskManager.makeEpic("Съездить к маме", "Обещал на 20 числа, но пришлось перенести");
-        taskManager.makeSubtask(taskManager.idCounter, "Купить банки для огурцов",
+        taskManager.addEpic("Съездить к маме", "Обещал на 20 числа, но пришлось перенести");
+        taskManager.addSubtask(taskManager.idCounter, "Купить банки для огурцов",
                 "Посмотреть в новом магазине");
 
         System.out.println(taskManager.tasks);
