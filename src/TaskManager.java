@@ -6,6 +6,7 @@ public class TaskManager {  // Класс для управления задач
     HashMap<Integer, Task> tasks;
     HashMap<Integer, Epic> epics;
     HashMap<Integer, Subtask> subtasks;
+    HashMap<Integer, ArrayList<Integer>> epicsTasks;    // Id епика и id их подзадач
 
     public TaskManager() {
         idCounter = 0;
@@ -14,21 +15,22 @@ public class TaskManager {  // Класс для управления задач
         subtasks = new HashMap<>();
     }
 
-    public void addTask(String title, String description) {   // Создание Задачи
-        idCounter += 1;
-        tasks.put(idCounter, new Task(title, description));
+    Integer TickIdAndGet() {    // делает тик и возвращает значение
+        idCounter++;
+        return idCounter;
     }
 
-    public void addEpic(String title, String description) {   // Создание Эпика
-        idCounter += 1;
-        epics.put(idCounter, new Epic(title, description));
+    public void addTask(Task task) {   // Создание Задачи
+        tasks.put(idCounter, task);
     }
 
-    public void addSubtask(Integer epicId, String title, String description) {    // Создание подзадачи
-        idCounter += 1;
-        epics.get(epicId).subTasksId.add(idCounter);    // Добавление id подзадачи в Эпик
-        epics.get(epicId).status = "NEW";
-        subtasks.put(idCounter, new Subtask(title, description));
+    public void addEpic(Epic epic) {   // Создание Эпика
+        epics.put(idCounter, epic);
+    }
+
+    public void addSubtask(Integer epicId, Subtask subtask) {    // Создание подзадачи
+        epics.get(epicId).addSubTaskId(idCounter);    // Добавление id подзадачи в Эпик
+        subtasks.put(idCounter, subtask);
     }
 
     public ArrayList<Task> getTasksList() {   // Вернуть список задач(без индексов)
@@ -68,22 +70,23 @@ public class TaskManager {  // Класс для управления задач
         return subtasks.get(id);
     }
 
-    public void updateTask(Integer taskId, String title, String description, String status) { // Обновление задачи
-        tasks.put(taskId, new Task(title, description, status));
+    public void updateTask(Integer taskId, Task task) { // Обновление задачи
+        tasks.put(taskId, task);
     }
 
-    public void updateEpic(Integer epicId, String title, String description) { // Обновление эпика
-        epics.put(epicId, new Epic(title, description));
+    public void updateEpic(Integer epicId, Epic epic) { // Обновление эпика
+        epics.put(epicId, epic);
     }
 
-    public void updateSubtask(Integer subtaskId, String title, String description, String status) { // Обновление подзадачи
-        subtasks.put(subtaskId, new Subtask(title, description, status));
+    //public void updateSubtask(Integer subtaskId, String title, String description, String status) { // Обновление подзадачи
+    public void updateSubtask(Integer subtaskId, Subtask subtask) { // Обновление подзадачи
+        subtasks.put(subtaskId, subtask);
         // Если подзадача выполнена, надо проверить другие подзадачи и изменить статус эпика.
         // Если подзадача "в процессе", надо изменить статус эпику.
-        if (!status.equals("NEW")) {
-            Integer targetEpicId = 0;   // Найдём id нужного эпика /*В буд. сабтаски могут знать, к кому отсносятся*/
+        if (!subtask.status.equals("NEW")) {
+            Integer targetEpicId = 0;   // Найдём id нужного эпика /*В буд. подзадачи могут знать, к кому относятся*/
             for (Integer epicId: epics.keySet()) {
-                if (epics.get(epicId).subTasksId.contains(subtaskId)) {
+                if (epics.get(epicId).getSubTasksId().contains(subtaskId)) {
                     targetEpicId = epicId;
                     break;
                 }
@@ -91,7 +94,7 @@ public class TaskManager {  // Класс для управления задач
 
             boolean isEpicInProcess = false; // Если остался false, эпик не в процессе
             boolean isEpicDone = true; // Если остался true, то эпик выполнен
-            for (Integer taskId : epics.get(targetEpicId).subTasksId) {
+            for (Integer taskId : epics.get(targetEpicId).getSubTasksId()) {
                 if (!subtasks.get(taskId).status.equals("DONE")) {  // Если одна задача не выполнена, эпик не выполнен
                     isEpicDone = false;
                 }
@@ -113,7 +116,7 @@ public class TaskManager {  // Класс для управления задач
     }
 
     public void deleteEpic(Integer epicId) {   // Удалить эпик
-        for (Integer taskId : epics.get(epicId).subTasksId) {   // Сначала удалить все подзадачи
+        for (Integer taskId : epics.get(epicId).getSubTasksId()) {   // Сначала удалить все подзадачи
             subtasks.remove(taskId);
         }
         epics.remove(epicId);
@@ -122,20 +125,20 @@ public class TaskManager {  // Класс для управления задач
     public void deleteSubTask(Integer taskId) {    // Удалить подзадачу
         Integer targetEpicId = 0;   // Найдём id нужного эпика
         for (Integer epicId: epics.keySet()) {
-            if (epics.get(epicId).subTasksId.contains(taskId)) {
+            if (epics.get(epicId).getSubTasksId().contains(taskId)) {
                 targetEpicId = epicId;
                 break;
             }
         }
 
-        epics.get(targetEpicId).subTasksId.remove(taskId);  // Удаляем из эпика
+        epics.get(targetEpicId).removeSubTaskId(taskId);  // Удаляем из эпика
         subtasks.remove(taskId);    // Удаляем из подзадач
 
         // Если есть другие подздалачи, надо проверить статус эпика
-        if (epics.get(targetEpicId).subTasksId.size() > 0) {
+        if (epics.get(targetEpicId).getSubTasksId().size() > 0) {
             boolean isEpicInProcess = false; // Если остался false, эпик не в процессе
             boolean isEpicDone = true; // Если остался true, то эпик выполнен
-            for (Integer SubtaskId : epics.get(targetEpicId).subTasksId) {
+            for (Integer SubtaskId : epics.get(targetEpicId).getSubTasksId()) {
                 if (!subtasks.get(SubtaskId).status.equals("DONE")) {  // Если одна задача не выполнена, эпик не выполнен
                     isEpicDone = false;
                 }
@@ -154,7 +157,7 @@ public class TaskManager {  // Класс для управления задач
 
     public ArrayList<Subtask> getSubtasksByEpic(Integer epicId) {   // Получить подзадачи эпика
         ArrayList<Subtask> subtasksByEpic = new ArrayList<>();
-        for (Integer taskId : epics.get(epicId).subTasksId) {
+        for (Integer taskId : epics.get(epicId).getSubTasksId()) {
             subtasksByEpic.add(subtasks.get(taskId));
         }
         return subtasksByEpic;
