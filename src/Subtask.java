@@ -9,6 +9,7 @@ public class Subtask extends Task {
 
     public Subtask(Integer id, String title, String description, Integer epicId, String status) {
         super(id, title, description, status);
+        this.epicId = epicId;
     }
 
     @Override
@@ -18,5 +19,9 @@ public class Subtask extends Task {
                 ", description='" + this.getDescription().length() + '\'' +
                 ", status='" + this.getStatus() + '\'' +
                 '}';
+    }
+
+    public Integer getEpicId() {
+        return epicId;
     }
 }

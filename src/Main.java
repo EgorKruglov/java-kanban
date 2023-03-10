@@ -32,9 +32,9 @@ public class Main {
         // Меняю статусы
         taskManager.updateTask(1, new Task(1, "Гуляю", "С детьми на ВДНХ", "IN_PROGRESS"));
         taskManager.updateSubtask(5, new Subtask(5, "Визга нет", "Попал камешек",
-                taskManager.getIdCounter()-2, "DONE"));
-        taskManager.updateSubtask(7, new Subtask(7, "Купить банки для огурцов", "",
-                taskManager.getIdCounter(), "DONE"));
+                3, "DONE"));
+        taskManager.updateSubtask(7, new Subtask(7, "Купить банки для огурцов", "", 6,
+                "DONE"));
 
         System.out.println("\n"+taskManager.getTasks());
         System.out.println(taskManager.getEpics());

@@ -27,9 +27,11 @@ public class TaskManager {  // Класс для управления задач
         epics.put(idCounter, epic);
     }
 
-    public void addSubtask(Integer epicId, Subtask subtask) {    // Создание подзадачи
-        epics.get(epicId).addSubTaskId(idCounter);    // Добавление id подзадачи в Эпик
+    public void addSubtask(Integer epicId, Subtask subtask) {
+        epics.get(epicId).addSubTaskId(idCounter); // Добавление id подзадачи в Эпик
         subtasks.put(idCounter, subtask);
+        String newStatus = updateEpicStatus(epics.get(epicId));
+        epics.get(epicId).setStatus(newStatus); // Обновление статуса эпика
     }
 
     public ArrayList<Task> getTasksList() {   // Вернуть список задач(без индексов)
@@ -80,78 +82,28 @@ public class TaskManager {  // Класс для управления задач
     //public void updateSubtask(Integer subtaskId, String title, String description, String status) { // Обновление подзадачи
     public void updateSubtask(Integer subtaskId, Subtask subtask) { // Обновление подзадачи
         subtasks.put(subtaskId, subtask);
-        // Если подзадача выполнена, надо проверить другие подзадачи и изменить статус эпика.
-        // Если подзадача "в процессе", надо изменить статус эпику.
-        if (!subtask.getStatus().equals("NEW")) {
-            Integer targetEpicId = 0;   // Найдём id нужного эпика /*В буд. подзадачи могут знать, к кому относятся*/
-            for (Integer epicId: epics.keySet()) {
-                if (epics.get(epicId).getSubTasksId().contains(subtaskId)) {
-                    targetEpicId = epicId;
-                    break;
-                }
-            }
-
-            boolean isEpicInProcess = false; // Если остался false, эпик не в процессе
-            boolean isEpicDone = true; // Если остался true, то эпик выполнен
-            for (Integer taskId : epics.get(targetEpicId).getSubTasksId()) {
-                if (!subtasks.get(taskId).getStatus().equals("DONE")) {  // Если одна задача не выполнена, эпик не выполнен
-                    isEpicDone = false;
-                }
-                if (!subtasks.get(taskId).getStatus().equals("NEW")) { // Если хотя бы одна не NEW, то епик в "процессе"
-                    isEpicInProcess = true; /*С помощью ещё одно флага можно исключить лишние проверки(на будущее)*/
-                }
-            }
-
-            if (isEpicDone) {   // Меняет статус
-                epics.get(targetEpicId).setStatus("DONE");
-            } else if (isEpicInProcess) {
-                epics.get(targetEpicId).setStatus("IN_PROCESS");
-            }
-        }
+        Integer epicId = subtask.getEpicId();
+        String newStatus = updateEpicStatus(epics.get(epicId)); // Обновление статуса эпика
+        epics.get(epicId).setStatus(newStatus);
     }
 
     public void deleteTask(Integer taskId) {   // Удалить задачу
         tasks.remove(taskId);
     }
 
-    public void deleteEpic(Integer epicId) {   // Удалить эпик
-        for (Integer taskId : epics.get(epicId).getSubTasksId()) {   // Сначала удалить все подзадачи
+    public void deleteEpic(Integer epicId) { // Удалить эпик
+        for (Integer taskId : epics.get(epicId).getSubTasksId()) { // Сначала удалить все подзадачи
             subtasks.remove(taskId);
         }
         epics.remove(epicId);
     }
 
-    public void deleteSubTask(Integer taskId) {    // Удалить подзадачу
-        Integer targetEpicId = 0;   // Найдём id нужного эпика
-        for (Integer epicId: epics.keySet()) {
-            if (epics.get(epicId).getSubTasksId().contains(taskId)) {
-                targetEpicId = epicId;
-                break;
-            }
-        }
-
-        epics.get(targetEpicId).removeSubTaskId(taskId);  // Удаляем из эпика
-        subtasks.remove(taskId);    // Удаляем из подзадач
-
-        // Если есть другие подздалачи, надо проверить статус эпика
-        if (epics.get(targetEpicId).getSubTasksId().size() > 0) {
-            boolean isEpicInProcess = false; // Если остался false, эпик не в процессе
-            boolean isEpicDone = true; // Если остался true, то эпик выполнен
-            for (Integer SubtaskId : epics.get(targetEpicId).getSubTasksId()) {
-                if (!subtasks.get(SubtaskId).getStatus().equals("DONE")) {  // Если одна задача не выполнена, эпик не выполнен
-                    isEpicDone = false;
-                }
-                if (!subtasks.get(SubtaskId).getStatus().equals("NEW")) { // Если хотя бы одна не NEW, то епик в "процессе"
-                    isEpicInProcess = true; /*С помощью ещё одно флага можно исключить лишние проверки(на будущее)*/
-                }
-            }
-
-            if (isEpicDone) {   // Меняет статус эпика
-                epics.get(targetEpicId).setStatus("DONE");
-            } else if (isEpicInProcess) {
-                epics.get(targetEpicId).setStatus("IN_PROCESS");
-            }
-        }
+    public void deleteSubTask(Integer subTaskId) { // Удалить подзадачу
+        Integer epicId = subtasks.get(subTaskId).getEpicId(); // Найдём id эпика
+        epics.get(epicId).removeSubTaskId(subTaskId);  // Удаляем из эпика
+        subtasks.remove(subTaskId);    // Удаляем из подзадач
+        String newStatus = updateEpicStatus(epics.get(epicId)); // Обновление статуса эпика
+        epics.get(epicId).setStatus(newStatus);
     }
 
     public ArrayList<Subtask> getSubtasksByEpic(Integer epicId) {   // Получить подзадачи эпика
@@ -178,7 +130,49 @@ public class TaskManager {  // Класс для управления задач
         return subtasks;
     }
 
-    private void updateEpicStatus (Epic epic) { // Изменяет статус эпика
+    private String updateEpicStatus (Epic epic) { // Изменяет статус эпика
+    /* Если есть хоть одна подзадача "IN_PROGRESS", значит статус эпика "IN_PROGRESS". Если не будет ни одной, значит
+    возможно три варианта:
+    * Все "DONE"
+    * Все "NEW"
+    * Есть и "DONE" и "NEW".
+    * С помощью флагов и условий можно это эффективно проверить и найти статус эпика. */
 
+        if (epic.getSubTasksId().size() == 0) return "NEW"; // Если передали эпик без подзадач
+
+        boolean isDoneContains = false;
+        boolean isNewContains = false;
+        for (Integer subtaskID : epic.getSubTasksId()) {
+            if (subtasks.get(subtaskID).getStatus().equals("В ПРОЦЕССЕ")) {
+                return "IN PROCESS";
+            }
+            // Если уже найдена, то не проверять. // Ищет "NEW" подзадачу
+            if (!(isNewContains) && subtasks.get(subtaskID).getStatus().equals("NEW")) isNewContains = true;
+            // Ищет "DONE" подзадачу
+            if (!(isDoneContains) && subtasks.get(subtaskID).getStatus().equals("DONE")) isDoneContains = true;
+        }
+        if (isNewContains) {
+            if (isDoneContains) {
+                return "IN PROCESS";
+            } else {
+                return "NEW";
+            }
+        }
+        if (isDoneContains) {
+            return "DONE";
+        }
+        return "???";
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
