@@ -1,8 +1,8 @@
 public class Task {
-    private String title;
-    private String description;
+    private final String title;
+    private final String description;
     private String status;
-    private Integer id; // Id задачи
+    private final Integer id; // Id задачи
 
     public Task(Integer id, String title, String description) { // Создание
         this.id = id;
