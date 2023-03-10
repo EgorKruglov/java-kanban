@@ -1,17 +1,17 @@
 public class Task {
-    String title;
-    String description;
-    String status;
+    private String title;
+    private String description;
+    private String status;
     private Integer id; // Id задачи
 
-    public Task(int id, String title, String description) { // Создание
+    public Task(Integer id, String title, String description) { // Создание
         this.id = id;
         this.title = title;
         this.description = description;
         status = "NEW";
     }
 
-    public Task(int id, String title, String description, String status) { // Обновление
+    public Task(Integer id, String title, String description, String status) { // Обновление
         this.id = id;
         this.title = title;
         this.description = description;
@@ -25,5 +25,21 @@ public class Task {
                 ", description='" + description.length() + '\'' +
                 ", status='" + status + '\'' +
                 '}';
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

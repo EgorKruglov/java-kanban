@@ -2,11 +2,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class TaskManager {  // Класс для управления задачами и эпиками
-    Integer idCounter;  // Счётчик-идентификатор для задач
-    HashMap<Integer, Task> tasks;
-    HashMap<Integer, Epic> epics;
-    HashMap<Integer, Subtask> subtasks;
-    HashMap<Integer, ArrayList<Integer>> epicsTasks;    // Id епика и id их подзадач
+    private Integer idCounter;  // Счётчик-идентификатор для задач
+    private final HashMap<Integer, Task> tasks;
+    private final HashMap<Integer, Epic> epics;
+    private final HashMap<Integer, Subtask> subtasks;
 
     public TaskManager() {
         idCounter = 0;
@@ -15,7 +14,7 @@ public class TaskManager {  // Класс для управления задач
         subtasks = new HashMap<>();
     }
 
-    Integer TickIdAndGet() {    // делает тик и возвращает значение
+    public Integer tickIdAndGet() {    // делает тик и возвращает значение
         idCounter++;
         return idCounter;
     }
@@ -83,7 +82,7 @@ public class TaskManager {  // Класс для управления задач
         subtasks.put(subtaskId, subtask);
         // Если подзадача выполнена, надо проверить другие подзадачи и изменить статус эпика.
         // Если подзадача "в процессе", надо изменить статус эпику.
-        if (!subtask.status.equals("NEW")) {
+        if (!subtask.getStatus().equals("NEW")) {
             Integer targetEpicId = 0;   // Найдём id нужного эпика /*В буд. подзадачи могут знать, к кому относятся*/
             for (Integer epicId: epics.keySet()) {
                 if (epics.get(epicId).getSubTasksId().contains(subtaskId)) {
@@ -95,18 +94,18 @@ public class TaskManager {  // Класс для управления задач
             boolean isEpicInProcess = false; // Если остался false, эпик не в процессе
             boolean isEpicDone = true; // Если остался true, то эпик выполнен
             for (Integer taskId : epics.get(targetEpicId).getSubTasksId()) {
-                if (!subtasks.get(taskId).status.equals("DONE")) {  // Если одна задача не выполнена, эпик не выполнен
+                if (!subtasks.get(taskId).getStatus().equals("DONE")) {  // Если одна задача не выполнена, эпик не выполнен
                     isEpicDone = false;
                 }
-                if (!subtasks.get(taskId).status.equals("NEW")) { // Если хотя бы одна не NEW, то епик в "процессе"
+                if (!subtasks.get(taskId).getStatus().equals("NEW")) { // Если хотя бы одна не NEW, то епик в "процессе"
                     isEpicInProcess = true; /*С помощью ещё одно флага можно исключить лишние проверки(на будущее)*/
                 }
             }
 
             if (isEpicDone) {   // Меняет статус
-                epics.get(targetEpicId).status = "DONE";
+                epics.get(targetEpicId).setStatus("DONE");
             } else if (isEpicInProcess) {
-                epics.get(targetEpicId).status = "IN_PROCESS";
+                epics.get(targetEpicId).setStatus("IN_PROCESS");
             }
         }
     }
@@ -139,18 +138,18 @@ public class TaskManager {  // Класс для управления задач
             boolean isEpicInProcess = false; // Если остался false, эпик не в процессе
             boolean isEpicDone = true; // Если остался true, то эпик выполнен
             for (Integer SubtaskId : epics.get(targetEpicId).getSubTasksId()) {
-                if (!subtasks.get(SubtaskId).status.equals("DONE")) {  // Если одна задача не выполнена, эпик не выполнен
+                if (!subtasks.get(SubtaskId).getStatus().equals("DONE")) {  // Если одна задача не выполнена, эпик не выполнен
                     isEpicDone = false;
                 }
-                if (!subtasks.get(SubtaskId).status.equals("NEW")) { // Если хотя бы одна не NEW, то епик в "процессе"
+                if (!subtasks.get(SubtaskId).getStatus().equals("NEW")) { // Если хотя бы одна не NEW, то епик в "процессе"
                     isEpicInProcess = true; /*С помощью ещё одно флага можно исключить лишние проверки(на будущее)*/
                 }
             }
 
             if (isEpicDone) {   // Меняет статус эпика
-                epics.get(targetEpicId).status = "DONE";
+                epics.get(targetEpicId).setStatus("DONE");
             } else if (isEpicInProcess) {
-                epics.get(targetEpicId).status = "IN_PROCESS";
+                epics.get(targetEpicId).setStatus("IN_PROCESS");
             }
         }
     }
@@ -163,4 +162,23 @@ public class TaskManager {  // Класс для управления задач
         return subtasksByEpic;
     }
 
+    public Integer getIdCounter() {
+        return idCounter;
+    }
+
+    public HashMap<Integer, Task> getTasks() {
+        return tasks;
+    }
+
+    public HashMap<Integer, Epic> getEpics() {
+        return epics;
+    }
+
+    public HashMap<Integer, Subtask> getSubtasks() {
+        return subtasks;
+    }
+
+    private void updateEpicStatus (Epic epic) { // Изменяет статус эпика
+
+    }
 }

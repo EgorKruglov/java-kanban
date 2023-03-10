@@ -13,15 +13,13 @@ public class Epic extends Task {
     public String toString() {
         return "Epic{" +
                 "subTasks=" + subTasksId.size() +
-                ", title='" + title + '\'' +
-                ", description='" + description.length() + '\'' +
-                ", status='" + status + '\'' +
+                ", title='" + this.getTitle() + '\'' +
+                ", description='" + this.getDescription().length() + '\'' +
+                ", status='" + this.getStatus() + '\'' +
                 '}';
     }
 
-    ArrayList<Integer> getSubTasksId () {
-        return subTasksId;
-    }
+    ArrayList<Integer> getSubTasksId () {return subTasksId;}
 
     void addSubTaskId (Integer id) {
         subTasksId.add(id);
@@ -30,4 +28,6 @@ public class Epic extends Task {
     void removeSubTaskId (Integer id) {
         subTasksId.remove(id);
     }
+
+
 }
