@@ -6,15 +6,14 @@ public class InMemoryTaskManager implements TaskManager {  // Класс для 
     private final HashMap<Integer, Task> tasks;
     private final HashMap<Integer, Epic> epics;
     private final HashMap<Integer, Subtask> subtasks;
-
-    private final ArrayList<Task> history;
+    private final HistoryManager historyManager;
 
     public InMemoryTaskManager() {
         idCounter = 0;
         tasks = new HashMap<>();
         epics = new HashMap<>();
         subtasks = new HashMap<>();
-        history = new ArrayList<>();
+        historyManager = new InMemoryHistoryManager();
     }
 
     @Override
@@ -72,19 +71,19 @@ public class InMemoryTaskManager implements TaskManager {  // Класс для 
 
     @Override
     public Task getTask(Integer id) {  // Получение задачи
-        addInHistory(tasks.get(id));
+        historyManager.add(tasks.get(id));
         return tasks.get(id);
     }
 
     @Override
     public Epic getEpic(Integer id) {  // Получение эпика
-        addInHistory(epics.get(id));
+        historyManager.add(epics.get(id));
         return epics.get(id);
     }
 
     @Override
     public Subtask getSubtask(Integer id) {    // Получение подзадачи
-        addInHistory(subtasks.get(id));
+        historyManager.add(subtasks.get(id));
         return subtasks.get(id);
     }
 
@@ -193,13 +192,6 @@ public class InMemoryTaskManager implements TaskManager {  // Класс для 
 
     @Override
     public ArrayList<Task> getHistory() {
-        return history;
-    }
-
-    private void addInHistory(Task task) {
-        if (task != null) {
-            if (history.size() > 9) history.remove(0);
-            history.add(task);
-        }
+        return Managers.getDefaultHistory();
     }
 }
