@@ -1,7 +1,7 @@
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = new InMemoryTaskManager();
 
         // + две задачи
         taskManager.addTask(new Task(taskManager.tickIdAndGet(), "Погулять с детьми",
