@@ -46,5 +46,10 @@ public class Main {
         System.out.println("\n"+taskManager.getTasks());
         System.out.println(taskManager.getEpics());
         System.out.println(taskManager.getSubtasks());
+
+        System.out.println("\n"+taskManager.getTask(1));
+        System.out.println(taskManager.getEpic(3));
+        System.out.println(taskManager.getSubtask(5));
+        System.out.println(taskManager.getHistory());
     }
 }

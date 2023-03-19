@@ -7,11 +7,23 @@ public class TaskManager {  // Класс для управления задач
     private final HashMap<Integer, Epic> epics;
     private final HashMap<Integer, Subtask> subtasks;
 
+    private final ArrayList<Task> history;
+
     public TaskManager() {
         idCounter = 0;
         tasks = new HashMap<>();
         epics = new HashMap<>();
         subtasks = new HashMap<>();
+        history = new ArrayList<>();
+    }
+
+    public ArrayList<Task> getHistory() {
+        return history;
+    }
+
+    private void addInHistory(Task task) {
+        if (history.size() > 9) history.remove(0);
+        history.add(task);
     }
 
     public Integer tickIdAndGet() {    // делает тик и возвращает значение
@@ -60,14 +72,17 @@ public class TaskManager {  // Класс для управления задач
     }
 
     public Task getTask(Integer id) {  // Получение задачи
+        addInHistory(tasks.get(id));
         return tasks.get(id);
     }
 
     public Epic getEpic(Integer id) {  // Получение эпика
+        addInHistory(epics.get(id));
         return epics.get(id);
     }
 
     public Subtask getSubtask(Integer id) {    // Получение подзадачи
+        addInHistory(subtasks.get(id));
         return subtasks.get(id);
     }
 
