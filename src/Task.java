@@ -1,17 +1,17 @@
 public class Task {
     private final String title;
     private final String description;
-    private String status;
+    private Statuses status;
     private final Integer id; // Id задачи
 
     public Task(Integer id, String title, String description) { // Создание
         this.id = id;
         this.title = title;
         this.description = description;
-        status = "NEW";
+        status = Statuses.NEW;
     }
 
-    public Task(Integer id, String title, String description, String status) { // Обновление
+    public Task(Integer id, String title, String description, Statuses status) { // Обновление
         this.id = id;
         this.title = title;
         this.description = description;
@@ -35,11 +35,11 @@ public class Task {
         return description;
     }
 
-    public String getStatus() {
+    public Statuses getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Statuses status) {
         this.status = status;
     }
 }

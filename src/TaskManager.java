@@ -17,15 +17,6 @@ public class TaskManager {  // Класс для управления задач
         history = new ArrayList<>();
     }
 
-    public ArrayList<Task> getHistory() {
-        return history;
-    }
-
-    private void addInHistory(Task task) {
-        if (history.size() > 9) history.remove(0);
-        history.add(task);
-    }
-
     public Integer tickIdAndGet() {    // делает тик и возвращает значение
         idCounter++;
         return idCounter;
@@ -42,7 +33,7 @@ public class TaskManager {  // Класс для управления задач
     public void addSubtask(Integer epicId, Subtask subtask) {
         epics.get(epicId).addSubTaskId(idCounter); // Добавление id подзадачи в Эпик
         subtasks.put(idCounter, subtask);
-        String newStatus = updateEpicStatus(epics.get(epicId));
+        Statuses newStatus = updateEpicStatus(epics.get(epicId));
         epics.get(epicId).setStatus(newStatus); // Обновление статуса эпика
     }
 
@@ -98,7 +89,7 @@ public class TaskManager {  // Класс для управления задач
     public void updateSubtask(Integer subtaskId, Subtask subtask) { // Обновление подзадачи
         subtasks.put(subtaskId, subtask);
         Integer epicId = subtask.getEpicId();
-        String newStatus = updateEpicStatus(epics.get(epicId)); // Обновление статуса эпика
+        Statuses newStatus = updateEpicStatus(epics.get(epicId)); // Обновление статуса эпика
         epics.get(epicId).setStatus(newStatus);
     }
 
@@ -117,7 +108,7 @@ public class TaskManager {  // Класс для управления задач
         Integer epicId = subtasks.get(subTaskId).getEpicId(); // Найдём id эпика
         epics.get(epicId).removeSubTaskId(subTaskId);  // Удаляем из эпика
         subtasks.remove(subTaskId);    // Удаляем из подзадач
-        String newStatus = updateEpicStatus(epics.get(epicId)); // Обновление статуса эпика
+        Statuses newStatus = updateEpicStatus(epics.get(epicId)); // Обновление статуса эпика
         epics.get(epicId).setStatus(newStatus);
     }
 
@@ -145,7 +136,7 @@ public class TaskManager {  // Класс для управления задач
         return subtasks;
     }
 
-    private String updateEpicStatus (Epic epic) { // Изменяет статус эпика
+    private Statuses updateEpicStatus (Epic epic) { // Изменяет статус эпика
     /* Если есть хоть одна подзадача "IN_PROGRESS", значит статус эпика "IN_PROGRESS". Если не будет ни одной, значит
     возможно три варианта:
     * Все "DONE"
@@ -153,29 +144,40 @@ public class TaskManager {  // Класс для управления задач
     * Есть и "DONE" и "NEW".
     * С помощью флагов и условий можно это эффективно проверить и найти статус эпика. */
 
-        if (epic.getSubTasksId().size() == 0) return "NEW"; // Если передали эпик без подзадач
+        if (epic.getSubTasksId().size() == 0) return Statuses.NEW; // Если передали эпик без подзадач
 
         boolean isDoneContains = false;
         boolean isNewContains = false;
         for (Integer subtaskID : epic.getSubTasksId()) {
-            if (subtasks.get(subtaskID).getStatus().equals("В ПРОЦЕССЕ")) {
-                return "IN PROCESS";
+            if (subtasks.get(subtaskID).getStatus().equals(Statuses.IN_PROGRESS)) {
+                return Statuses.IN_PROGRESS;
             }
             // Если уже найдена, то не проверять. // Ищет "NEW" подзадачу
-            if (!(isNewContains) && subtasks.get(subtaskID).getStatus().equals("NEW")) isNewContains = true;
+            if (!(isNewContains) && subtasks.get(subtaskID).getStatus().equals(Statuses.NEW)) isNewContains = true;
             // Ищет "DONE" подзадачу
-            if (!(isDoneContains) && subtasks.get(subtaskID).getStatus().equals("DONE")) isDoneContains = true;
+            if (!(isDoneContains) && subtasks.get(subtaskID).getStatus().equals(Statuses.DONE)) isDoneContains = true;
         }
         if (isNewContains) {
             if (isDoneContains) {
-                return "IN PROCESS";
+                return Statuses.IN_PROGRESS;
             } else {
-                return "NEW";
+                return Statuses.NEW;
             }
         }
         if (isDoneContains) {
-            return "DONE";
+            return Statuses.DONE;
         }
-        return "???";
+        return null;
+    }
+
+    public ArrayList<Task> getHistory() {
+        return history;
+    }
+
+    private void addInHistory(Task task) {
+        if (task != null) {
+            if (history.size() > 9) history.remove(0);
+            history.add(task);
+        }
     }
 }

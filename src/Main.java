@@ -30,11 +30,11 @@ public class Main {
         System.out.println(taskManager.getSubtasks());
 
         // Меняю статусы
-        taskManager.updateTask(1, new Task(1, "Гуляю", "С детьми на ВДНХ", "IN_PROGRESS"));
+        taskManager.updateTask(1, new Task(1, "Гуляю", "С детьми на ВДНХ", Statuses.IN_PROGRESS));
         taskManager.updateSubtask(5, new Subtask(5, "Визга нет", "Попал камешек",
-                3, "DONE"));
+                3, Statuses.DONE));
         taskManager.updateSubtask(7, new Subtask(7, "Купить банки для огурцов", "", 6,
-                "DONE"));
+                Statuses.DONE));
 
         System.out.println("\n"+taskManager.getTasks());
         System.out.println(taskManager.getEpics());
