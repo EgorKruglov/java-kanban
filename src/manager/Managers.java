@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+package manager;
 
 public class Managers {
 
@@ -8,7 +8,8 @@ public class Managers {
         return new InMemoryTaskManager();
     }
 
-    public static ArrayList<Task> getDefaultHistory() {
-        return new InMemoryHistoryManager().getHistory();
+    public static HistoryManager getDefaultHistory() {
+        return new InMemoryHistoryManager();
     }
+
 }

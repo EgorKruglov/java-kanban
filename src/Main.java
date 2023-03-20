@@ -1,7 +1,14 @@
+import manager.Managers;
+import manager.TaskManager;
+import task.Epic;
+import task.Status;
+import task.Subtask;
+import task.Task;
+
 public class Main {
 
     public static void main(String[] args) {
-//        TaskManager taskManager = new InMemoryTaskManager();
+//        manager.TaskManager taskManager = new manager.InMemoryTaskManager();
         TaskManager taskManager = Managers.getDefault();
 
         // + две задачи
@@ -31,11 +38,11 @@ public class Main {
         System.out.println(taskManager.getSubtasks());
 
         // Меняю статусы
-        taskManager.updateTask(1, new Task(1, "Гуляю", "С детьми на ВДНХ", Statuses.IN_PROGRESS));
+        taskManager.updateTask(1, new Task(1, "Гуляю", "С детьми на ВДНХ", Status.IN_PROGRESS));
         taskManager.updateSubtask(5, new Subtask(5, "Визга нет", "Попал камешек",
-                3, Statuses.DONE));
+                3, Status.DONE));
         taskManager.updateSubtask(7, new Subtask(7, "Купить банки для огурцов", "", 6,
-                Statuses.DONE));
+                Status.DONE));
 
         System.out.println("\n"+taskManager.getTasks());
         System.out.println(taskManager.getEpics());
