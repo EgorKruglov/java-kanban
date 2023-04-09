@@ -47,10 +47,12 @@ public class InMemoryTaskManager implements TaskManager {  // Класс для 
         Status newStatus = updateEpicStatus(epics.get(epicId));
         epics.get(epicId).setStatus(newStatus); // Обновление статуса эпика
     }
+
     @Override
     public ArrayList<Task> getTasksList() {   // Вернуть список задач(без индексов)
         return new ArrayList<>(tasks.values());
     }
+
     @Override
     public ArrayList<Subtask> getSubTasksList() {   // Вернуть список подзадач
         return new ArrayList<>(subtasks.values());
@@ -114,23 +116,27 @@ public class InMemoryTaskManager implements TaskManager {  // Класс для 
     }
 
     @Override
-    public void deleteTask(Integer taskId) {   // Удалить задачу
+    public void deleteTask(Integer taskId) { // Удалить задачу
         tasks.remove(taskId);
+        historyManager.remove(taskId); // Удалить из истории
     }
 
     @Override
     public void deleteEpic(Integer epicId) { // Удалить эпик
         for (Integer taskId : epics.get(epicId).getSubTasksId()) { // Сначала удалить все подзадачи
             subtasks.remove(taskId);
+            historyManager.remove(taskId); // Удалить из истории
         }
         epics.remove(epicId);
+        historyManager.remove(epicId); // Удалить из истории
     }
 
     @Override
     public void deleteSubTask(Integer subTaskId) { // Удалить подзадачу
         Integer epicId = subtasks.get(subTaskId).getEpicId(); // Найдём id эпика
         epics.get(epicId).removeSubTaskId(subTaskId);  // Удаляем из эпика
-        subtasks.remove(subTaskId);    // Удаляем из подзадач
+        subtasks.remove(subTaskId); // Удаляем из подзадач
+        historyManager.remove(subTaskId); // Удалить из истории
         Status newStatus = updateEpicStatus(epics.get(epicId)); // Обновление статуса эпика
         epics.get(epicId).setStatus(newStatus);
     }

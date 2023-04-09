@@ -8,16 +8,15 @@ import task.Task;
 public class Main {
 
     public static void main(String[] args) {
-//        manager.TaskManager taskManager = new manager.InMemoryTaskManager();
         TaskManager taskManager = Managers.getDefault();
 
-        // + две задачи
+        // + Две задачи
         taskManager.addTask(new Task(taskManager.tickIdAndGet(), "Погулять с детьми",
                 "Давно не были на ВДНХ"));
         taskManager.addTask(new Task(taskManager.tickIdAndGet(), "Приготовить ужин",
                 "Нужны лук, помидоры, картошка, говядина, сметана"));
 
-        // + эпик с двумя задачами
+        // + Эпик с тремя задачами
         taskManager.addEpic(new Epic(taskManager.tickIdAndGet(), "Поменять колёса",
                 "На этой неделе надо успеть"));
         taskManager.addSubtask(taskManager.getIdCounter(), new Subtask(taskManager.tickIdAndGet(),
@@ -25,39 +24,42 @@ public class Main {
         taskManager.addSubtask(taskManager.getIdCounter()-1, new Subtask(taskManager.tickIdAndGet(),
                 "Валерий посмотрит визг потом",
                 "Какой-то визг из под колес то появляется, то пропадает.", taskManager.getIdCounter()-1));
+        taskManager.addSubtask(taskManager.getIdCounter()-2, new Subtask(taskManager.tickIdAndGet(),
+                "Отдать Валерию диск",
+                "Давно обещал вернуть диск с фото отдыха", taskManager.getIdCounter()-2));
 
-        // + эпик с одной подзадачей
+        // + Эпик пустой
         taskManager.addEpic(new Epic(taskManager.tickIdAndGet(),"Съездить к маме",
                 "Обещал на 20 числа, но пришлось перенести"));
-        taskManager.addSubtask(taskManager.getIdCounter(), new Subtask(taskManager.tickIdAndGet(),
-                "Купить банки для огурцов",
-                "Посмотреть в новом магазине", taskManager.getIdCounter()));
 
+        // Напечатать всё
         System.out.println("\n"+taskManager.getTasks());
         System.out.println(taskManager.getEpics());
         System.out.println(taskManager.getSubtasks());
 
-        // Меняю статусы
-        taskManager.updateTask(1, new Task(1, "Гуляю", "С детьми на ВДНХ", Status.IN_PROGRESS));
-        taskManager.updateSubtask(5, new Subtask(5, "Визга нет", "Попал камешек",
-                3, Status.DONE));
-        taskManager.updateSubtask(7, new Subtask(7, "Купить банки для огурцов", "", 6,
-                Status.DONE));
-
-        System.out.println("\n"+taskManager.getTasks());
-        System.out.println(taskManager.getEpics());
-        System.out.println(taskManager.getSubtasks());
-
-        taskManager.deleteTask(2);  //Удаляю задачу
-        taskManager.deleteEpic(6);  //Удаляю эпик
-
-        System.out.println("\n"+taskManager.getTasks());
-        System.out.println(taskManager.getEpics());
-        System.out.println(taskManager.getSubtasks());
-
-        System.out.println("\n"+taskManager.getTask(1));    // Получаю такси
+        System.out.println("\n"+taskManager.getTask(1)); // Получаю таски
+        System.out.println(taskManager.getTask(1));
         System.out.println(taskManager.getEpic(3));
-        System.out.println(taskManager.getSubtask(5));
-        System.out.println(taskManager.getHistory());   // Получаю историю
+        System.out.println(taskManager.getTask(1));
+        System.out.println(taskManager.getTask(2));
+
+        System.out.println("\nИстория:");
+        System.out.println(taskManager.getHistory()); // Получаю историю
+
+        System.out.println("\n"+taskManager.getEpic(7)); // Получаю таски
+        System.out.println(taskManager.getTask(1));
+
+        System.out.println("\nИстория:");
+        System.out.println(taskManager.getHistory()); // Получаю историю
+
+        // Удаляю задачи
+        taskManager.deleteTask(1);
+        System.out.println("\nИстория:");
+        System.out.println(taskManager.getHistory()); // Получаю историю
+
+        taskManager.deleteTask(3);
+        System.out.println("\nИстория:");
+        System.out.println(taskManager.getHistory()); // Получаю историю
+
     }
 }
