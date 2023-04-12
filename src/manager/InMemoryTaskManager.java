@@ -14,7 +14,6 @@ public class InMemoryTaskManager implements TaskManager {  // Класс для 
     private final HashMap<Integer, Epic> epics;
     private final HashMap<Integer, Subtask> subtasks;
     private final HistoryManager historyManager;
-    //private final ArrayList<Task> historyManager;     // Или так?
 
     public InMemoryTaskManager() {
         idCounter = 0;
