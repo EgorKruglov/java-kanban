@@ -12,6 +12,21 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node head;
     private Node tail;
 
+    @Override
+    public void remove(int id) { // Удалить из истории задачу
+        customList.remove(id);
+    }
+
+    @Override
+    public void add(Task task) {
+        customList.linkLast(task);
+    }
+
+    @Override
+    public ArrayList getHistory() {
+        return customList.getTasks();
+    }
+
     private class CustomLinkedList {
         private final HashMap<Integer, Node> customLinkedList = new HashMap<>(15); // <id задачи, узел с задачей>
 
@@ -59,12 +74,8 @@ public class InMemoryHistoryManager implements HistoryManager {
             }
         }
 
-        private ArrayList<Task> getTasks() {
-            ArrayList<Task> history = new ArrayList<>();
-            for (Node node : customLinkedList.values()) {
-                history.add(node.task);
-            }
-            return history;
+        private ArrayList<Node> getTasks() {
+            return new ArrayList<>(customLinkedList.values());
         }
 
     }
@@ -79,20 +90,5 @@ public class InMemoryHistoryManager implements HistoryManager {
             this.next = next;
             this.prev = prev;
         }
-    }
-
-    @Override
-    public void remove(int id) { // Удалить из истории задачу
-        customList.remove(id);
-    }
-
-    @Override
-    public void add(Task task) {
-        customList.linkLast(task);
-    }
-
-    @Override
-    public ArrayList<Task> getHistory() {
-        return customList.getTasks();
     }
 }
