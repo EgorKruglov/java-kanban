@@ -23,8 +23,13 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public ArrayList getHistory() {
-        return customList.getTasks();
+    public ArrayList<Task> getHistory() {
+        ArrayList<Node> historyNodes = customList.getTasks();
+        ArrayList<Task> historyList = new ArrayList<>();
+        for (Node node : historyNodes) {
+            historyList.add(node.task);
+        }
+        return historyList;
     }
 
     private class CustomLinkedList {

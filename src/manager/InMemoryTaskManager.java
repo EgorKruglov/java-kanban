@@ -1,5 +1,6 @@
 package manager;
 
+import org.w3c.dom.Node;
 import task.Epic;
 import task.Status;
 import task.Subtask;
@@ -8,7 +9,7 @@ import task.Task;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class InMemoryTaskManager implements TaskManager {  // Класс для управления задачами и эпиками
+public class InMemoryTaskManager implements TaskManager {  // Этот класс хранит задачи в оперативной памяти
     private Integer idCounter;  // Счётчик-идентификатор для задач
     private final HashMap<Integer, Task> tasks;
     private final HashMap<Integer, Epic> epics;
