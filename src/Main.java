@@ -1,12 +1,10 @@
 import manager.Managers;
 import manager.TaskManager;
 import task.Epic;
-import task.Status;
 import task.Subtask;
 import task.Task;
 
 import java.io.File;
-import java.io.IOException;
 
 public class Main {
 
@@ -36,34 +34,12 @@ public class Main {
         saveManager.addEpic(new Epic(saveManager.tickIdAndGet(),"Съездить к маме",
                 "Обещал на 20 числа, но пришлось перенести."));
 
-        // Напечатать всё
-        System.out.println("\n"+saveManager.getTasks());
-        System.out.println(saveManager.getEpics());
-        System.out.println(saveManager.getSubtasks());
-
-        System.out.println("\n"+saveManager.getTask(1)); // Получаю таски
+        // Запросы тасков
         System.out.println(saveManager.getTask(1));
         System.out.println(saveManager.getEpic(3));
         System.out.println(saveManager.getTask(1));
         System.out.println(saveManager.getTask(2));
-
-        System.out.println("\nИстория:");
-        System.out.println(saveManager.getHistory()); // Получаю историю
-
-        System.out.println("\n"+saveManager.getEpic(7)); // Получаю таски
-        System.out.println(saveManager.getTask(1));
-
-        System.out.println("\nИстория:");
-        System.out.println(saveManager.getHistory()); // Получаю историю
-
-        // Удаляю задачи
-        saveManager.deleteTask(1);
-        System.out.println("\nИстория:");
-        System.out.println(saveManager.getHistory()); // Получаю историю
-
-        saveManager.deleteTask(3);
-        System.out.println("\nИстория:");
-        System.out.println(saveManager.getHistory()); // Получаю историю
+        System.out.println(saveManager.getEpic(7));
 
     }
 }

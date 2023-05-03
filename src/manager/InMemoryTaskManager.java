@@ -1,6 +1,5 @@
 package manager;
 
-import org.w3c.dom.Node;
 import task.Epic;
 import task.Status;
 import task.Subtask;
@@ -8,12 +7,14 @@ import task.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {  // Этот класс хранит задачи в оперативной памяти
     private Integer idCounter;  // Счётчик-идентификатор для задач
-    private final HashMap<Integer, Task> tasks;
-    private final HashMap<Integer, Epic> epics;
-    private final HashMap<Integer, Subtask> subtasks;
+    private final Map<Integer, Task> tasks;
+    private final Map<Integer, Epic> epics;
+    private final Map<Integer, Subtask> subtasks;
     private final HistoryManager historyManager;
 
     public InMemoryTaskManager() {
@@ -22,6 +23,18 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
         epics = new HashMap<>();
         subtasks = new HashMap<>();
         historyManager = Managers.getDefaultHistory();
+    }
+
+    public InMemoryTaskManager(Integer idCounter,
+                               Map<Integer, Task> tasks,
+                               Map<Integer, Epic> epics,
+                               Map<Integer, Subtask> subtasks,
+                               HistoryManager historyManager) {  // Конструктор для восстановления менеджера
+        this.idCounter = idCounter;
+        this.tasks = tasks;
+        this.epics = epics;
+        this.subtasks = subtasks;
+        this.historyManager = historyManager;
     }
 
     @Override
@@ -49,33 +62,45 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
     }
 
     @Override
-    public ArrayList<Task> getTasksList() {   // Вернуть список задач(без индексов)
+    public List<Task> getTasksList() {   // Вернуть список задач(без индексов)
         return new ArrayList<>(tasks.values());
     }
 
     @Override
-    public ArrayList<Subtask> getSubTasksList() {   // Вернуть список подзадач
+    public List<Subtask> getSubTasksList() {   // Вернуть список подзадач
         return new ArrayList<>(subtasks.values());
     }
 
     @Override
-    public ArrayList<Epic> getEpicsList() {   // Вернуть список эпиков
+    public List<Epic> getEpicsList() {   // Вернуть список эпиков
         return new ArrayList<>(epics.values());
     }
 
     @Override
-    public void deleteAllTasks() {    // Удалить все задачи
+    public void deleteAllTasks() {  // Удалить все задачи
+        for (Integer id : tasks.keySet()) {  // Удалить из истории
+            historyManager.remove(id);
+        }
         tasks.clear();
     }
 
     @Override
-    public void deleteAllEpics() {    // Удалить все эпики
+    public void deleteAllEpics() {  // Удалить все эпики
+        for (Epic epic : epics.values()) {  // Удалить из истории подзадачи эпика
+            for (Integer subTaskId : epic.getSubTasksId()) {
+                historyManager.remove(subTaskId);
+            }
+            historyManager.remove(epic.getId());  // Удалить из истории эпик
+        }
         epics.clear();
         subtasks.clear();
     }
 
     @Override
     public void deleteAllSubtasks() {    // Удалить все подзадачи
+        for (Integer id : subtasks.keySet()) {
+            historyManager.remove(id);
+        }
         subtasks.clear();
     }
 
@@ -142,7 +167,7 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
     }
 
     @Override
-    public ArrayList<Subtask> getSubtasksByEpic(Integer epicId) {   // Получить подзадачи эпика
+    public List<Subtask> getSubtasksByEpic(Integer epicId) {   // Получить подзадачи эпика
         ArrayList<Subtask> subtasksByEpic = new ArrayList<>();
         for (Integer taskId : epics.get(epicId).getSubTasksId()) {
             subtasksByEpic.add(subtasks.get(taskId));
@@ -156,17 +181,17 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
     }
 
     @Override
-    public HashMap<Integer, Task> getTasks() {
+    public Map<Integer, Task> getTasks() {
         return tasks;
     }
 
     @Override
-    public HashMap<Integer, Epic> getEpics() {
+    public Map<Integer, Epic> getEpics() {
         return epics;
     }
 
     @Override
-    public HashMap<Integer, Subtask> getSubtasks() {
+    public Map<Integer, Subtask> getSubtasks() {
         return subtasks;
     }
 
@@ -205,7 +230,7 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
     }
 
     @Override
-    public ArrayList<Task> getHistory() {
+    public List<Task> getHistory() {
         return historyManager.getHistory();
     }
 }

@@ -1,6 +1,5 @@
 package manager;
 
-import org.w3c.dom.Node;
 import task.Task;
 
 import java.util.ArrayList;

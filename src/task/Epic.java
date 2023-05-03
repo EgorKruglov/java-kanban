@@ -1,11 +1,11 @@
 package task;
-
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class Epic extends Task {
 
-    private final ArrayList<Integer> subTasksId;    // Эпик хранит только Id своих подзадач.
+    private final List<Integer> subTasksId;    // Эпик хранит только Id своих подзадач.
 
     public Epic(Integer id, String title, String description) {
         super(id, title, description);
@@ -41,7 +41,7 @@ public class Epic extends Task {
                 getSubTasksId().equals(otherEpic.subTasksId);
     }
 
-    public ArrayList<Integer> getSubTasksId () {return subTasksId;}
+    public List<Integer> getSubTasksId () {return subTasksId;}
 
     public void addSubTaskId (Integer id) {
         subTasksId.add(id);
