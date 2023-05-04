@@ -16,7 +16,7 @@ public interface TaskManager {
 
     public void addEpic(Epic epic);
 
-    public void addSubtask(Integer epicId, Subtask subtask);
+    public void addSubtask(Subtask subtask);
 
     public List<Task> getTasksList();
 

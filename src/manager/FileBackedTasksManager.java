@@ -1,4 +1,5 @@
-package manager;                    // Это новый класс!
+package manager;                    // Класс для сериализации
+import ExtraExceptions.ManagerSaveException;
 import task.*;
 
 import java.io.*;
@@ -13,18 +14,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         this.file = file;
     }
 
-    public FileBackedTasksManager(File file,  // Конструктор для восстановления менеджера
-                                  Integer idCounter,
-                                  Map<Integer, Task> tasks,
-                                  Map<Integer, Epic> epics,
-                                  Map<Integer, Subtask> subtasks,
-                                  HistoryManager historyManager) {
-        super(idCounter, tasks, epics, subtasks, historyManager);
-        this.file = file;
-
-    }
-
-    public static void main(String[] args) {  // Метод для проверки сериализации
+    static public void main(String[] args) {  // Метод для проверки сериализации
         TaskManager saveManager = Managers.getAutoSave(new File("C:\\Users\\admin\\dev\\java-kanban\\src\\Memory.csv"));
 
         // + Две задачи
@@ -36,14 +26,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         // + Эпик с тремя задачами
         saveManager.addEpic(new Epic(saveManager.tickIdAndGet(), "Поменять колёса",
                 "На этой неделе надо успеть"));
-        saveManager.addSubtask(saveManager.getIdCounter(), new Subtask(saveManager.tickIdAndGet(),
+        saveManager.addSubtask(new Subtask(saveManager.tickIdAndGet(),
                 "У Валерия насос забрать", "", saveManager.getIdCounter()-1));
-        saveManager.addSubtask(saveManager.getIdCounter()-1, new Subtask(saveManager.tickIdAndGet(),
+        saveManager.addSubtask(new Subtask(saveManager.tickIdAndGet(),
                 "Валерий посмотрит визг потом",
-                "Какой-то визг из под колес то появляется, то пропадает.", saveManager.getIdCounter()-1));
-        saveManager.addSubtask(saveManager.getIdCounter()-2, new Subtask(saveManager.tickIdAndGet(),
+                "Какой-то визг из под колес то появляется, то пропадает.", saveManager.getIdCounter()-2));
+        saveManager.addSubtask(new Subtask(saveManager.tickIdAndGet(),
                 "Отдать Валерию диск",
-                "Давно обещал вернуть диск с фото отдыха", saveManager.getIdCounter()-2));
+                "Давно обещал вернуть диск с фото отдыха", saveManager.getIdCounter()-3));
 
         // + Эпик пустой
         saveManager.addEpic(new Epic(saveManager.tickIdAndGet(),"Съездить к маме",
@@ -57,14 +47,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println(saveManager.getEpic(7));
 
         FileBackedTasksManager backTester = loadFromFile(new File("C:\\Users\\admin\\dev\\java-kanban\\src\\Memory.csv"));
+        // Выведем прочитанные данные
+        System.out.println("\n" + backTester.getTasksList());
+        System.out.println(backTester.getEpicsList());
+        System.out.println(backTester.getSubTasksList());
+        System.out.println(backTester.getHistory());
     }
 
     private void save() { // Сохраняет текущее состояние менеджера в файл
         try (Writer fileWriter = new FileWriter(file)) {
-
-            if (file == null) {
-                throw new ManagerSaveException("Не удалось найти файл");
-            }
 
             fileWriter.write("\nid,type,name,status,description,epic\n"); // Напишем первую строку файла csv
 
@@ -91,13 +82,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
             fileWriter.write(historyToString(super.getHistory()));  // Добавить в файл историю
 
-        } catch (ManagerSaveException e) {  // Я не до конца понял, где нужно его выбрасывать...
-            System.out.println(e.getMessage());
-        }
-        catch (FileNotFoundException e) {
-            System.out.println(Arrays.toString(e.getStackTrace()));
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ManagerSaveException("Не удалось сохранить данные");
         }
     }
 
@@ -119,14 +105,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return intValues;
     }
 
-    /*Правильно ли я понимаю, что мне нужно восстановить все поля класса InMemoryTaskManager при сериализации?*/
     public static FileBackedTasksManager loadFromFile(File file) {
 
+        FileBackedTasksManager backTester = new FileBackedTasksManager(file);
+
         int idCounter = 0;  // Счётчик-идентификатор для задач
-        final Map<Integer, Task> tasks = new HashMap<>();
-        final Map<Integer, Epic> epics = new HashMap<>();
-        final Map<Integer, Subtask> subtasks = new HashMap<>();
-        final HistoryManager historyManager = Managers.getDefaultHistory();
 
         try {
             List<String> lines = Files.readAllLines(file.toPath());
@@ -141,25 +124,22 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
                 switch (TaskName.valueOf(lineValues[1])) {  // Добавляем таски в их хештаблицы
                     case TASK:
-                        tasks.put(taskId,
-                                new Task(taskId,
-                                        lineValues[2],
-                                        lineValues[4],
-                                        Status.valueOf(lineValues[3])));
+                        backTester.addTask(new Task(taskId,
+                                lineValues[2],
+                                lineValues[4],
+                                Status.valueOf(lineValues[3])));
                         break;
                     case EPIC:
-                        epics.put(taskId,
-                                new Epic(taskId,
-                                        lineValues[2],
-                                        lineValues[4]));
+                        backTester.addEpic(new Epic(taskId,
+                                lineValues[2],
+                                lineValues[4]));
                         break;
                     case SUBTASK:
-                        subtasks.put(taskId,
-                                new Subtask(taskId,
-                                        lineValues[2],
-                                        lineValues[4],
-                                        Integer.parseInt(lineValues[5]),
-                                        Status.valueOf(lineValues[3])));
+                        backTester.addSubtask(new Subtask(taskId,
+                                lineValues[2],
+                                lineValues[4],
+                                Integer.parseInt(lineValues[5]),
+                                Status.valueOf(lineValues[3])));
                         break;
                     default:
                         System.out.println("Задача не распознана");
@@ -168,21 +148,20 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
             // Создаём historyManager
             Integer[] historyValues = historyFromString(lines.get(lines.size()-1));
-
             for (Integer history : historyValues) {
-                if (tasks.containsKey(history)) {
-                    historyManager.add(tasks.get(history));
-                } else if (subtasks.containsKey(history)) {
-                    historyManager.add(subtasks.get(history));
-                } else if (epics.containsKey(history)) {
-                    historyManager.add(epics.get(history));
+                if (backTester.getTasks().containsKey(history)) {
+                    backTester.addInHistory(backTester.getTask(history));
+                } else if (backTester.getSubtasks().containsKey(history)) {
+                    backTester.addInHistory(backTester.getSubtask(history));
+                } else if (backTester.getEpics().containsKey(history)) {
+                    backTester.addInHistory(backTester.getEpic(history));
                 }
             }
 
         } catch (IOException ex) {
             System.out.println("Файл не найден.");
         }
-        return new FileBackedTasksManager(file, idCounter, tasks, epics, subtasks, historyManager);
+        return backTester;
     }
 
     @Override
@@ -198,8 +177,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void addSubtask(Integer epicId, Subtask subtask) {
-        super.addSubtask(epicId, subtask);
+    public void addSubtask(Subtask subtask) {
+        super.addSubtask(subtask);
         save();
     }
 
@@ -258,11 +237,5 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public void deleteSubTask(Integer subTaskId) {
         super.deleteSubTask(subTaskId);
         save();
-    }
-
-    private static class ManagerSaveException extends IOException {
-        public ManagerSaveException(String message) {
-            super(message);
-        }
     }
 }

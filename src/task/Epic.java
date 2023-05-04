@@ -50,4 +50,8 @@ public class Epic extends Task {
     public void removeSubTaskId (Integer id) {
         subTasksId.remove(id);
     }
+
+    public void clearSubTasks() {
+        subTasksId.clear();
+    }
 }

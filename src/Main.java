@@ -21,14 +21,14 @@ public class Main {
         // + Эпик с тремя задачами
         saveManager.addEpic(new Epic(saveManager.tickIdAndGet(), "Поменять колёса",
                 "На этой неделе надо успеть"));
-        saveManager.addSubtask(saveManager.getIdCounter(), new Subtask(saveManager.tickIdAndGet(),
+        saveManager.addSubtask(new Subtask(saveManager.tickIdAndGet(),
                 "У Валерия насос забрать", "", saveManager.getIdCounter()-1));
-        saveManager.addSubtask(saveManager.getIdCounter()-1, new Subtask(saveManager.tickIdAndGet(),
+        saveManager.addSubtask(new Subtask(saveManager.tickIdAndGet(),
                 "Валерий посмотрит визг потом",
-                "Какой-то визг из под колес то появляется, то пропадает.", saveManager.getIdCounter()-1));
-        saveManager.addSubtask(saveManager.getIdCounter()-2, new Subtask(saveManager.tickIdAndGet(),
+                "Какой-то визг из под колес то появляется, то пропадает.", saveManager.getIdCounter()-2));
+        saveManager.addSubtask(new Subtask(saveManager.tickIdAndGet(),
                 "Отдать Валерию диск",
-                "Давно обещал вернуть диск с фото отдыха", saveManager.getIdCounter()-2));
+                "Давно обещал вернуть диск с фото отдыха", saveManager.getIdCounter()-3));
 
         // + Эпик пустой
         saveManager.addEpic(new Epic(saveManager.tickIdAndGet(),"Съездить к маме",
