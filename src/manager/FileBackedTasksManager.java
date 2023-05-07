@@ -1,5 +1,5 @@
 package manager;                    // Класс для сериализации
-import ExtraExceptions.ManagerSaveException;
+import extraExceptions.ManagerSaveException;
 import task.*;
 
 import java.io.*;
@@ -142,7 +142,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                                 Status.valueOf(lineValues[3])));
                         break;
                     default:
-                        System.out.println("Задача не распознана");
+                        throw new ManagerSaveException("Не удалось загрузить часть данных");
                 }
             }
 
@@ -159,7 +159,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
 
         } catch (IOException ex) {
-            System.out.println("Файл не найден.");
+            throw new ManagerSaveException("Не удалось загрузить данные");
         }
         return backTester;
     }
