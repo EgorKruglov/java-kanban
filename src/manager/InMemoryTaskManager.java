@@ -25,18 +25,6 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
         historyManager = Managers.getDefaultHistory();
     }
 
-    public InMemoryTaskManager(Integer idCounter,
-                               Map<Integer, Task> tasks,
-                               Map<Integer, Epic> epics,
-                               Map<Integer, Subtask> subtasks,
-                               HistoryManager historyManager) {  // Конструктор для восстановления менеджера
-        this.idCounter = idCounter;
-        this.tasks = tasks;
-        this.epics = epics;
-        this.subtasks = subtasks;
-        this.historyManager = historyManager;
-    }
-
     @Override
     public Integer tickIdAndGet() {    // делает тик и возвращает значение
         idCounter++;
@@ -138,6 +126,8 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
 
     @Override
     public void updateEpic(Integer epicId, Epic epic) { // Обновление эпика
+        List<Integer> subTasksId = epics.get(epicId).getSubTasksId();
+        epic.setSubTasksId(subTasksId);
         epics.put(epicId, epic);
     }
 

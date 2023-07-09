@@ -44,20 +44,28 @@ public class InMemoryHistoryManager implements HistoryManager {
                 oldHead.next.prev = null;
                 head = oldHead.next;
             }
-            Node oldTail = tail; // Добавление хвоста
-            Node newNode = new Node(tail, task, null);
-            tail = newNode;
-            if (oldTail == null) {
-                head = new Node(null, task, null);
-                tail = head;
-            } else
+
+            if (tail == null) { // Если добавляется первый элемент
+                Node newNode = new Node(null, task, null);
+                tail = newNode;
+                head = newNode;
+                customLinkedList.put(task.getId(), newNode);
+            } else {
+                Node oldTail = tail; // Добавление хвоста
+                Node newNode = new Node(tail, task, null);
+                tail = newNode;
                 oldTail.next = newNode;
-            customLinkedList.put(task.getId(), newNode);
+                customLinkedList.put(task.getId(), newNode);
+            }
         }
 
         private void remove(int id) { // Удалить из истории задачу
             if (customLinkedList.containsKey(id)) {
-                if (head.task.getId() == id) { // Если в голове
+
+                if (customLinkedList.size() == 1) {
+                    customLinkedList.remove(id);
+
+                } else if (head.task.getId() == id) { // Если в голове
                     customLinkedList.remove(id);
                     Node oldHead = head;
                     head = oldHead.next;

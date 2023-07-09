@@ -15,7 +15,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     static public void main(String[] args) {  // Метод для проверки сериализации
-        TaskManager saveManager = Managers.getAutoSave(new File("C:\\Users\\admin\\dev\\java-kanban\\src\\Memory.csv"));
+//        TaskManager saveManager = Managers.getAutoSave(new File("C:\\Users\\admin\\dev\\java-kanban\\src\\Memory.csv"));
+        TaskManager saveManager = Managers.getAutoSave(new File("src\\Memory.csv"));
 
         // + Две задачи
         saveManager.addTask(new Task(saveManager.tickIdAndGet(), "Погулять с детьми",
@@ -40,13 +41,16 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 "Обещал на 20 числа, но пришлось перенести."));
 
         // Запросы тасков
-        System.out.println(saveManager.getTask(1));
-        System.out.println(saveManager.getEpic(3));
-        System.out.println(saveManager.getTask(1));
-        System.out.println(saveManager.getTask(2));
-        System.out.println(saveManager.getEpic(7));
+        saveManager.getTask(1);
+        saveManager.getEpic(3);
+        saveManager.getTask(1);
+        saveManager.getTask(2);
+        saveManager.getEpic(7);
 
-        FileBackedTasksManager backTester = loadFromFile(new File("C:\\Users\\admin\\dev\\java-kanban\\src\\Memory.csv"));
+        //FileBackedTasksManager backTester = loadFromFile(new File("src\\Memory.csv"));
+        /*Когда восстанавливаешь данные из файла, их не нужно сразу записывать, поэтому нужно использовать
+        * методы без save()*/
+        InMemoryTaskManager backTester = loadFromFile(new File("src\\Memory.csv"));
         // Выведем прочитанные данные
         System.out.println("\n" + backTester.getTasksList());
         System.out.println(backTester.getEpicsList());
@@ -54,10 +58,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println(backTester.getHistory());
     }
 
-    private void save() { // Сохраняет текущее состояние менеджера в файл
+    public void save() { // Сохраняет текущее состояние менеджера в файл
         try (Writer fileWriter = new FileWriter(file)) {
 
-            fileWriter.write("\nid,type,name,status,description,epic\n"); // Напишем первую строку файла csv
+            fileWriter.write("\nid;type;name;status;description;epic\n"); // Напишем первую строку файла csv
 
             List<Task> tasks = super.getTasksList();
             List<Subtask> subtasks = super.getSubTasksList();
@@ -105,15 +109,23 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return intValues;
     }
 
-    public static FileBackedTasksManager loadFromFile(File file) {
+    public static InMemoryTaskManager loadFromFile(File file) {
 
-        FileBackedTasksManager backTester = new FileBackedTasksManager(file);
+        //FileBackedTasksManager backTester = new FileBackedTasksManager(file);
+        InMemoryTaskManager backTester = new InMemoryTaskManager();
 
         int idCounter = 0;  // Счётчик-идентификатор для задач
 
         try {
             List<String> lines = Files.readAllLines(file.toPath());
-            for (int i = 2; i < lines.size() - 2; i++) { // В первых и последних двух сроках нет задач
+            int lastLineId;
+            if (Objects.equals(lines.get(lines.size() - 1), "")) { // Если истории нет, то прочитать на одну строку больше
+                lastLineId = lines.size() - 1;
+            } else {
+                lastLineId = lines.size() - 2;
+            }
+
+            for (int i = 2; i < lastLineId; i++) { // В первых и последних двух сроках нет задач
 
                 String[] lineValues = lines.get(i).split(";"); // Парсим по строке из файла
                 Integer taskId = Integer.parseInt(lineValues[0]);
@@ -147,14 +159,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
 
             // Создаём historyManager
-            Integer[] historyValues = historyFromString(lines.get(lines.size()-1));
-            for (Integer history : historyValues) {
-                if (backTester.getTasks().containsKey(history)) {
-                    backTester.addInHistory(backTester.getTask(history));
-                } else if (backTester.getSubtasks().containsKey(history)) {
-                    backTester.addInHistory(backTester.getSubtask(history));
-                } else if (backTester.getEpics().containsKey(history)) {
-                    backTester.addInHistory(backTester.getEpic(history));
+            String historyCharVariables = lines.get(lines.size()-1);
+            if (!Objects.equals(historyCharVariables, "")) {
+                Integer[] historyValues = historyFromString(historyCharVariables);
+                for (Integer history : historyValues) {
+                    if (backTester.getTasks().containsKey(history)) {
+                        backTester.addInHistory(backTester.getTask(history));
+                    } else if (backTester.getSubtasks().containsKey(history)) {
+                        backTester.addInHistory(backTester.getSubtask(history));
+                    } else if (backTester.getEpics().containsKey(history)) {
+                        backTester.addInHistory(backTester.getEpic(history));
+                    }
                 }
             }
 
@@ -236,6 +251,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void deleteSubTask(Integer subTaskId) {
         super.deleteSubTask(subTaskId);
+        save();
+    }
+
+    @Override
+    public void updateTask(Integer taskId, Task task) { // Обновление задачи
+        super.updateTask(taskId, task);
+        save();
+    }
+
+    @Override
+    public void updateEpic(Integer epicId, Epic epic) { // Обновление эпика
+        super.updateEpic(epicId, epic);
+        save();
+    }
+
+    @Override
+    public void updateSubtask(Integer subtaskId, Subtask subtask) { // Обновление подзадачи
+        super.updateSubtask(subtaskId, subtask);
         save();
     }
 }
