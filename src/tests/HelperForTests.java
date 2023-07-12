@@ -6,6 +6,8 @@ import task.Epic;
 import task.Subtask;
 import task.Task;
 
+import java.time.LocalDateTime;
+
 /*Этот класс добавляет удобные методы по быстрому созданию задач, эпиков, подзадач*/
 abstract class HelperForTests<T extends TaskManager> {
 
@@ -25,7 +27,9 @@ abstract class HelperForTests<T extends TaskManager> {
         subtask1 = new Subtask(manager.tickIdAndGet(), // + subtask
                 "subtask title 1",
                 "subtask description 1",
-                epicId);
+                epicId,
+                45,
+                LocalDateTime.of(2023, 7,10,12,0));
         manager.addSubtask(subtask1);
         subtask1Id = manager.getIdCounter();
     }
@@ -34,7 +38,9 @@ abstract class HelperForTests<T extends TaskManager> {
         subtask2 = new Subtask(manager.tickIdAndGet(), // + subtask
                 "subtask title 2",
                 "subtask description 2",
-                epicId);
+                epicId,
+                30,
+                LocalDateTime.of(2023, 7,10,15,0));
         manager.addSubtask(subtask2);
         subtask2Id = manager.getIdCounter();
     }
@@ -52,7 +58,11 @@ abstract class HelperForTests<T extends TaskManager> {
     }
 
     void createTask1() {
-        task1 = new Task(manager.tickIdAndGet(), "task title 1", "task description 1");
+        task1 = new Task(manager.tickIdAndGet(),
+                "task title 1",
+                "task description 1",
+                15,
+                LocalDateTime.of(2023, 7,12,9,30));
         manager.addTask(task1);
         task1Id = task1.getId();
     }
@@ -61,10 +71,5 @@ abstract class HelperForTests<T extends TaskManager> {
         task2 = new Task(manager.tickIdAndGet(), "task title 2", "task description 2");
         manager.addTask(task2);
         task2Id = task2.getId();
-    }
-
-    void createTwoTasks() {
-        createTask1();
-        createTask2();
     }
 }

@@ -1,5 +1,7 @@
 package task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Subtask extends Task {
@@ -16,18 +18,30 @@ public class Subtask extends Task {
         this.epicId = epicId;
     }
 
+    public Subtask(Integer id, String title, String description, Integer epicId, Integer duration, LocalDateTime startTime) {
+        super(id, title, description, duration, startTime);
+        this.epicId = epicId;
+    }
+
+    public Subtask(Integer id, String title, String description, Integer epicId, Status status, Integer duration, LocalDateTime startTime) {
+        super(id, title, description, status, duration, startTime);
+        this.epicId = epicId;
+    }
+
     @Override
     public String toString() {
         return "Subtask{" +
-                "title='" + this.getTitle() + '\'' +
-                ", description='" + this.getDescription().length() + '\'' +
+                "id='" + this.getId() + '\'' +
+                ", title='" + this.getTitle() + '\'' +
                 ", status='" + this.getStatus() + '\'' +
+                ", startTime='" + this.getStartTime() + '\'' +
+                ", duration='" + this.getDuration() + '\'' +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getTitle(), getDescription(), getStatus(), getId(), epicId);
+        return Objects.hash(getTitle(), getDescription(), getStatus(), getId(), epicId, getStartTime(), getDuration());
     }
 
     @Override
@@ -40,7 +54,9 @@ public class Subtask extends Task {
                 Objects.equals(getDescription(), otherTask.getDescription()) &&
                 Objects.equals(getStatus(), otherTask.getStatus()) &&
                 Objects.equals(getId(), otherTask.getId()) &&
-                Objects.equals(epicId, otherTask.epicId);
+                Objects.equals(epicId, otherTask.epicId) &&
+                Objects.equals(getStartTime(), otherTask.getStartTime()) &&
+                Objects.equals(getDuration(), otherTask.getDuration());
     }
 
     public Integer getEpicId() {

@@ -4,6 +4,7 @@ import task.*;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
@@ -15,7 +16,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     static public void main(String[] args) {  // Метод для проверки сериализации
-//        TaskManager saveManager = Managers.getAutoSave(new File("C:\\Users\\admin\\dev\\java-kanban\\src\\Memory.csv"));
         TaskManager saveManager = Managers.getAutoSave(new File("src\\Memory.csv"));
 
         // + Две задачи
@@ -61,25 +61,42 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public void save() { // Сохраняет текущее состояние менеджера в файл
         try (Writer fileWriter = new FileWriter(file)) {
 
-            fileWriter.write("\nid;type;name;status;description;epic\n"); // Напишем первую строку файла csv
+            fileWriter.write("\nid;type;name;status;description;epicId;startTime;duration;endTime\n"); // Напишем первую строку файла csv
 
             List<Task> tasks = super.getTasksList();
             List<Subtask> subtasks = super.getSubTasksList();
             List<Epic> epics = super.getEpicsList();
 
             for (Task task : tasks) { // Добавляем созданные задачи в файл
-                fileWriter.write(String.format("%s;%s;%s;%s;%s;\n", task.getId(), TaskName.TASK, task.getTitle(),
-                        task.getStatus(), task.getDescription()));
+                fileWriter.write(String.format("%s;%s;%s;%s;%s;%s;%s;\n",
+                        task.getId(),
+                        TaskName.TASK,
+                        task.getTitle(),
+                        task.getStatus(),
+                        task.getDescription(),
+                        task.getStartTime(),
+                        task.getDuration()));
             }
 
             for (Epic epic : epics) {
-                fileWriter.write(String.format("%s;%s;%s;%s;%s;\n", epic.getId(), TaskName.EPIC, epic.getTitle(),
-                        epic.getStatus(), epic.getDescription()));
+                fileWriter.write(String.format("%s;%s;%s;%s;%s;\n",
+                        epic.getId(),
+                        TaskName.EPIC,
+                        epic.getTitle(),
+                        epic.getStatus(),
+                        epic.getDescription()));
             }
 
             for (Subtask subtask : subtasks) {
-                fileWriter.write(String.format("%s;%s;%s;%s;%s;%s;\n", subtask.getId(), TaskName.SUBTASK,
-                        subtask.getTitle(), subtask.getStatus(), subtask.getDescription(), subtask.getEpicId()));
+                fileWriter.write(String.format("%s;%s;%s;%s;%s;%s;%s;%s;\n",
+                        subtask.getId(),
+                        TaskName.SUBTASK,
+                        subtask.getTitle(),
+                        subtask.getStatus(),
+                        subtask.getDescription(),
+                        subtask.getEpicId(),
+                        subtask.getStartTime(),
+                        subtask.getDuration()));
             }
 
             fileWriter.write("\n");
@@ -118,6 +135,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         try {
             List<String> lines = Files.readAllLines(file.toPath());
+
             int lastLineId;
             if (Objects.equals(lines.get(lines.size() - 1), "")) { // Если истории нет, то прочитать на одну строку больше
                 lastLineId = lines.size() - 1;
@@ -136,22 +154,48 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
                 switch (TaskName.valueOf(lineValues[1])) {  // Добавляем таски в их хештаблицы
                     case TASK:
-                        backTester.addTask(new Task(taskId,
-                                lineValues[2],
-                                lineValues[4],
-                                Status.valueOf(lineValues[3])));
+                        if (!lineValues[6].equals("null")) {
+                            backTester.addTask(new Task(
+                                    taskId,
+                                    lineValues[2],
+                                    lineValues[4],
+                                    Status.valueOf(lineValues[3]),
+                                    Integer.parseInt(lineValues[6]),
+                                    LocalDateTime.parse(lineValues[5])));
+                        } else {
+                            backTester.addTask(new Task(
+                                    taskId,
+                                    lineValues[2],
+                                    lineValues[4],
+                                    Status.valueOf(lineValues[3])));
+                        }
                         break;
                     case EPIC:
-                        backTester.addEpic(new Epic(taskId,
+                        backTester.addEpic(new Epic(
+                                taskId,
                                 lineValues[2],
                                 lineValues[4]));
                         break;
                     case SUBTASK:
-                        backTester.addSubtask(new Subtask(taskId,
-                                lineValues[2],
-                                lineValues[4],
-                                Integer.parseInt(lineValues[5]),
-                                Status.valueOf(lineValues[3])));
+                        if (!lineValues[6].equals("null")) { // Если есть duration и startTime
+                            backTester.addSubtask(new Subtask(
+                                    taskId,
+                                    lineValues[2],
+                                    lineValues[4],
+                                    Integer.parseInt(lineValues[5]),
+                                    Status.valueOf(lineValues[3]),
+                                    Integer.parseInt(lineValues[7]),
+                                    LocalDateTime.parse(lineValues[6])));
+                        } else {
+                            backTester.addSubtask(new Subtask(
+                                    taskId,
+                                    lineValues[2],
+                                    lineValues[4],
+                                    Integer.parseInt(lineValues[5]),
+                                    Status.valueOf(lineValues[3])));
+                        }
+
+
                         break;
                     default:
                         throw new ManagerSaveException("Не удалось загрузить часть данных");

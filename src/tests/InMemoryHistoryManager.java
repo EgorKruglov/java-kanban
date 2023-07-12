@@ -69,8 +69,6 @@ public class InMemoryHistoryManager extends HelperForTests<TaskManager> {
         historyManager.add(task1);
         historyManager.remove(task1Id);
         assertEquals(0, historyManager.getHistory().size());
-
-        createTask1();
         createEpic();
         createSubtask1();
         createSubtask2();
@@ -78,13 +76,13 @@ public class InMemoryHistoryManager extends HelperForTests<TaskManager> {
         historyManager.add(epic);
         historyManager.add(subtask1);
         historyManager.add(subtask2);
-        historyManager.remove(2); // Удаление из начала
+        historyManager.remove(1); // Удаление из начала
         assertEquals(List.of(epic,subtask1, subtask2), historyManager.getHistory());
 
-        historyManager.remove(4); // Удаление из середины
+        historyManager.remove(3); // Удаление из середины
         assertEquals(List.of(epic, subtask2), historyManager.getHistory());
 
-        historyManager.remove(5); // Удаление с конца
+        historyManager.remove(4); // Удаление с конца
         assertEquals(List.of(epic), historyManager.getHistory());
 
     }

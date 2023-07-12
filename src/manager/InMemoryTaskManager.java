@@ -1,14 +1,13 @@
 package manager;
 
+import extraExceptions.TaskPeriodConflictException;
+import manager.util.TaskComparator;
 import task.Epic;
-import task.Status;
 import task.Subtask;
 import task.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {  // Этот класс хранит задачи в оперативной памяти
     private Integer idCounter;  // Счётчик-идентификатор для задач
@@ -16,6 +15,7 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
     private final Map<Integer, Epic> epics;
     private final Map<Integer, Subtask> subtasks;
     private final HistoryManager historyManager;
+    private final TreeSet<Task> prioritizedTasks;
 
     public InMemoryTaskManager() {
         idCounter = 0;
@@ -23,6 +23,7 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
         epics = new HashMap<>();
         subtasks = new HashMap<>();
         historyManager = Managers.getDefaultHistory();
+        prioritizedTasks = new TreeSet<>(new TaskComparator());
     }
 
     @Override
@@ -33,7 +34,11 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
 
     @Override
     public void addTask(Task task) {   // Создание Задачи
+        if (isTaskPeriodConflict(task)) {
+            return;
+        }
         tasks.put(task.getId(), task);
+        prioritizedTasks.add(task);
     }
 
     @Override
@@ -43,11 +48,14 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
 
     @Override
     public void addSubtask(Subtask subtask) {
-        Integer epicId = subtask.getEpicId();
-        epics.get(epicId).addSubTaskId(subtask.getId()); // Добавление id подзадачи в Эпик
+        if (isTaskPeriodConflict(subtask)) {
+            return;
+        }
+        Epic epic = epics.get(subtask.getEpicId());
         subtasks.put(subtask.getId(), subtask);
-        Status newStatus = updateEpicStatus(epics.get(epicId));
-        epics.get(epicId).setStatus(newStatus); // Обновление статуса эпика
+        epic.addSubTaskId(subtask.getId()); // Добавление id подзадачи в Эпик
+        epic.updateEpic(subtasks); // Обновление статуса эпика
+        prioritizedTasks.add(subtask);
     }
 
     public void addInHistory(Task task) {
@@ -71,19 +79,21 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
 
     @Override
     public void deleteAllTasks() {  // Удалить все задачи
-        for (Integer id : tasks.keySet()) {  // Удалить из истории
-            historyManager.remove(id);
+        for (Task task : tasks.values()) {  // Удалить из истории и сортированного списка
+            historyManager.remove(task.getId());
+            prioritizedTasks.remove(task);
         }
         tasks.clear();
     }
 
     @Override
     public void deleteAllEpics() {  // Удалить все эпики
-        for (Epic epic : epics.values()) {  // Удалить из истории подзадачи эпика
-            for (Integer subTaskId : epic.getSubTasksId()) {
-                historyManager.remove(subTaskId);
-            }
-            historyManager.remove(epic.getId());  // Удалить из истории эпик
+        for (Subtask subtask : subtasks.values()) {
+            historyManager.remove(subtask.getId());
+            prioritizedTasks.remove(subtask);
+        }
+        for (Integer id : epics.keySet()) {
+            historyManager.remove(id);
         }
         epics.clear();
         subtasks.clear();
@@ -91,13 +101,14 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
 
     @Override
     public void deleteAllSubtasks() {    // Удалить все подзадачи
-        for (Integer id : subtasks.keySet()) {
-            historyManager.remove(id);
+        for (Subtask subtask : subtasks.values()) {
+            historyManager.remove(subtask.getId());
+            prioritizedTasks.remove(subtask);
         }
         subtasks.clear();
         for (Epic epic : epics.values()) {
             epic.clearSubTasks();
-            updateEpicStatus(epic);
+            epic.updateEpic(subtasks);
         }
     }
 
@@ -121,7 +132,11 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
 
     @Override
     public void updateTask(Integer taskId, Task task) { // Обновление задачи
+        if (isTaskPeriodConflict(task)) {
+            return;
+        }
         tasks.put(taskId, task);
+        updatePrioritizedTasks(task);
     }
 
     @Override
@@ -133,21 +148,25 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
 
     @Override
     public void updateSubtask(Integer subtaskId, Subtask subtask) { // Обновление подзадачи
+        if (isTaskPeriodConflict(subtask)) {
+            return;
+        }
         subtasks.put(subtaskId, subtask);
-        Integer epicId = subtask.getEpicId();
-        Status newStatus = updateEpicStatus(epics.get(epicId)); // Обновление статуса эпика
-        epics.get(epicId).setStatus(newStatus);
+        epics.get(subtask.getEpicId()).updateEpic(subtasks);
+        updatePrioritizedTasks(subtask);
     }
 
     @Override
     public void deleteTask(Integer taskId) { // Удалить задачу
-        tasks.remove(taskId);
+        prioritizedTasks.remove(tasks.get(taskId));
         historyManager.remove(taskId); // Удалить из истории
+        tasks.remove(taskId);
     }
 
     @Override
     public void deleteEpic(Integer epicId) { // Удалить эпик
         for (Integer taskId : epics.get(epicId).getSubTasksId()) { // Сначала удалить все подзадачи
+            prioritizedTasks.remove(subtasks.get(taskId));
             subtasks.remove(taskId);
             historyManager.remove(taskId); // Удалить из истории
         }
@@ -157,12 +176,12 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
 
     @Override
     public void deleteSubTask(Integer subTaskId) { // Удалить подзадачу
-        Integer epicId = subtasks.get(subTaskId).getEpicId(); // Найдём id эпика
-        epics.get(epicId).removeSubTaskId(subTaskId);  // Удаляем из эпика
+        Epic epic = epics.get(subtasks.get(subTaskId).getEpicId());
+        prioritizedTasks.remove(subtasks.get(subTaskId));
         subtasks.remove(subTaskId); // Удаляем из подзадач
         historyManager.remove(subTaskId); // Удалить из истории
-        Status newStatus = updateEpicStatus(epics.get(epicId)); // Обновление статуса эпика
-        epics.get(epicId).setStatus(newStatus);
+        epic.removeSubTaskId(subTaskId);  // Удаляем из эпика
+        epic.updateEpic(subtasks); // Обновление статуса эпика
     }
 
     @Override
@@ -172,6 +191,47 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
             subtasksByEpic.add(subtasks.get(taskId));
         }
         return subtasksByEpic;
+    }
+
+    private void updatePrioritizedTasks(Task newTask) {
+        Iterator<Task> iterator = prioritizedTasks.iterator();
+        while (iterator.hasNext()) {
+            Task task = iterator.next();
+            if (task.getId().equals(newTask.getId())) {
+                iterator.remove();
+                break;
+            }
+        }
+        prioritizedTasks.add(newTask);
+    }
+
+    private boolean isTaskPeriodConflict(Task newTask) { // Проверка на наложение сроков задач друг на друга
+        if (newTask.getStartTime() == null) { // Без заданного начала отправляются в конец списка
+            return false;
+        }
+
+        LocalDateTime newTaskEndTime = newTask.getEndTime();
+        for (Task task : prioritizedTasks) {
+            if (Objects.equals(task.getId(), newTask.getId())) { // Чтобы пропустила саму себя
+                continue;
+            }
+            if (task.getStartTime() != null) {
+                LocalDateTime taskEndTime = task.getEndTime();
+                // Если оба условия снизу true, то нет конфликта периодов
+                boolean firstBool = newTaskEndTime.isBefore(task.getStartTime());
+                boolean secondBool = newTask.getStartTime().isAfter(taskEndTime);
+
+                if (!firstBool && !secondBool) {
+                    try {
+                        throw new TaskPeriodConflictException("Ошибка: Задача накладывается на другие задачи");
+                    } catch (TaskPeriodConflictException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -194,42 +254,13 @@ public class InMemoryTaskManager implements TaskManager {  // Этот клас�
         return subtasks;
     }
 
-    private Status updateEpicStatus (Epic epic) { // Изменяет статус эпика
-    /* Если есть хоть одна подзадача "IN_PROGRESS", значит статус эпика "IN_PROGRESS". Если не будет ни одной, значит
-    возможно три варианта:
-    * Все "DONE"
-    * Все "NEW"
-    * Есть и "DONE" и "NEW".
-    * С помощью флагов и условий можно это эффективно проверить и найти статус эпика. */
-
-        if (epic.getSubTasksId().size() == 0) return Status.NEW; // Если передали эпик без подзадач
-
-        boolean isDoneContains = false;
-        boolean isNewContains = false;
-        for (Integer subtaskID : epic.getSubTasksId()) {
-            if (subtasks.get(subtaskID).getStatus().equals(Status.IN_PROGRESS)) {
-                return Status.IN_PROGRESS;
-            }
-            // Если уже найдена, то не проверять. // Ищет "NEW" подзадачу
-            if (!(isNewContains) && subtasks.get(subtaskID).getStatus().equals(Status.NEW)) isNewContains = true;
-            // Ищет "DONE" подзадачу
-            if (!(isDoneContains) && subtasks.get(subtaskID).getStatus().equals(Status.DONE)) isDoneContains = true;
-        }
-        if (isNewContains) {
-            if (isDoneContains) {
-                return Status.IN_PROGRESS;
-            } else {
-                return Status.NEW;
-            }
-        }
-        if (isDoneContains) {
-            return Status.DONE;
-        }
-        return null;
-    }
-
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    @Override
+    public TreeSet<Task> getPrioritizedTasks() {
+        return prioritizedTasks;
     }
 }

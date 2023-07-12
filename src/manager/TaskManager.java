@@ -7,6 +7,7 @@ import task.Task;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 public interface TaskManager {
     public Integer tickIdAndGet();
@@ -58,4 +59,6 @@ public interface TaskManager {
     public Map<Integer, Subtask> getSubtasks();
 
     public List<Task> getHistory();
+
+    public TreeSet<Task> getPrioritizedTasks();
 }
