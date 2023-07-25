@@ -1,22 +1,32 @@
 package manager;                    // Класс для сериализации
+
 import extraExceptions.ManagerSaveException;
 import task.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
-
     private final File file;
 
-    public FileBackedTasksManager(File file) {
-        this.file = file;
+    public FileBackedTasksManager(String path) {
+        this.file = new File(path);
+    }
+
+    /* Конструктор, чтобы присвоить путь по умолчанию, когда не передан путь к файлу. */
+    public FileBackedTasksManager() {
+        file = new File("src\\Memory.csv");
     }
 
     static public void main(String[] args) {  // Метод для проверки сериализации
-        TaskManager saveManager = Managers.getAutoSave(new File("src\\Memory.csv"));
+        TaskManager saveManager = Managers.getAutoSave("src\\Memory.csv");
 
         // + Две задачи
         saveManager.addTask(new Task(saveManager.tickIdAndGet(), "Погулять с детьми",
@@ -224,21 +234,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void addTask(Task task) {
-        super.addTask(task);
+    public Boolean addTask(Task task) {
+        Boolean result = super.addTask(task);
         save();
+        return result;
     }
 
     @Override
-    public void addEpic(Epic epic) {
-        super.addEpic(epic);
+    public Boolean addEpic(Epic epic) {
+        Boolean result = super.addEpic(epic);
         save();
+        return result;
     }
 
     @Override
-    public void addSubtask(Subtask subtask) {
-        super.addSubtask(subtask);
+    public Boolean addSubtask(Subtask subtask) {
+        Boolean result = super.addSubtask(subtask);
         save();
+        return result;
     }
 
     @Override
@@ -281,38 +294,44 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void deleteTask(Integer taskId) {
-        super.deleteTask(taskId);
+    public Boolean deleteTask(Integer taskId) {
+        Boolean result = super.deleteTask(taskId);
         save();
+        return result;
     }
 
     @Override
-    public void deleteEpic(Integer epicId) {
-        super.deleteEpic(epicId);
+    public Boolean deleteEpic(Integer epicId) {
+        Boolean result = super.deleteEpic(epicId);
         save();
+        return result;
     }
 
     @Override
-    public void deleteSubTask(Integer subTaskId) {
-        super.deleteSubTask(subTaskId);
+    public Boolean deleteSubTask(Integer subTaskId) {
+        Boolean result = super.deleteSubTask(subTaskId);
         save();
+        return result;
     }
 
     @Override
-    public void updateTask(Integer taskId, Task task) { // Обновление задачи
-        super.updateTask(taskId, task);
+    public Boolean updateTask(Integer taskId, Task task) { // Обновление задачи
+        Boolean result = super.updateTask(taskId, task);
         save();
+        return result;
     }
 
     @Override
-    public void updateEpic(Integer epicId, Epic epic) { // Обновление эпика
-        super.updateEpic(epicId, epic);
+    public Boolean updateEpic(Integer epicId, Epic epic) { // Обновление эпика
+        Boolean result = super.updateEpic(epicId, epic);
         save();
+        return result;
     }
 
     @Override
-    public void updateSubtask(Integer subtaskId, Subtask subtask) { // Обновление подзадачи
-        super.updateSubtask(subtaskId, subtask);
+    public Boolean updateSubtask(Integer subtaskId, Subtask subtask) { // Обновление подзадачи
+        Boolean result = super.updateSubtask(subtaskId, subtask);
         save();
+        return result;
     }
 }

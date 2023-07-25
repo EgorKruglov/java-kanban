@@ -2,7 +2,6 @@ package tests;
 
 import manager.FileBackedTasksManager;
 import manager.InMemoryTaskManager;
-import manager.TaskManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,10 +9,7 @@ import java.io.File;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/*Тип FileBackedTasksManager для того, чтобы были доступны методы сериализации,
-* которых нет в интерфейсе TaskManager*/
 public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
 
     InMemoryTaskManager resultManager;
@@ -21,7 +17,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     @BeforeEach
     @Override
     void freshProgramBeforeTest() {
-        manager = new FileBackedTasksManager(new File("src\\Memory.csv"));
+        manager = new FileBackedTasksManager("src\\Memory.csv");
     }
 
     /*Сериализация*/

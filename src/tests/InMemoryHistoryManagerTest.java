@@ -3,7 +3,6 @@ package tests;
 import manager.HistoryManager;
 import manager.Managers;
 import manager.TaskManager;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -11,20 +10,18 @@ import task.Task;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.*;
 
 /*HelperForTests наследуется ради удобных методов тестирования.
 Хотя сохранять таски в manager для тестирования HistoryManager и не нужно*/
-public class InMemoryHistoryManager extends HelperForTests<TaskManager> {
+public class InMemoryHistoryManagerTest extends HelperForTests<TaskManager> {
 
     HistoryManager historyManager;
 
     @BeforeEach
     void freshProgramBeforeTest() {
         historyManager = Managers.getDefaultHistory();
-        manager = Managers.getDefault();
+        manager = Managers.getWithoutSave();
     }
 
     @Test
