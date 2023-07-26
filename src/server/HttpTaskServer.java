@@ -7,12 +7,12 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import manager.Managers;
 import manager.TaskManager;
+import server.util.LocalDateTimeAdapter;
 import task.Epic;
 import task.Status;
 import task.Subtask;
 import task.Task;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -28,8 +28,8 @@ public class HttpTaskServer {
     TaskManager manager;
     Gson gson;
 
-    public HttpTaskServer() throws IOException {
-        manager = Managers.getAutoSave("src\\Memory.csv");
+    public HttpTaskServer() throws IOException, InterruptedException {
+        manager = Managers.getDefault("http://localhost:8078");
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext("/tasks/task/", this::processingTasksMethods);
         server.createContext("/tasks/epic/", this::processingEpicsMethods);

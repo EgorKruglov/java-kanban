@@ -30,11 +30,10 @@ public class Subtask extends Task {
     @Override
     public String toString() {
         return "Subtask{" +
-                "id='" + this.getId() + '\'' +
-                ", title='" + this.getTitle() + '\'' +
-                ", status='" + this.getStatus() + '\'' +
-                ", startTime='" + this.getStartTime() + '\'' +
-                ", duration='" + this.getDuration() + '\'' +
+                "id='" + getId() + '\'' +
+                ", title='" + getTitle() + '\''+
+                ", epicId=" + epicId +
+                ", status='" + getStatus() + '\''+
                 '}';
     }
 

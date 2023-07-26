@@ -25,49 +25,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         file = new File("src\\Memory.csv");
     }
 
-    static public void main(String[] args) {  // Метод для проверки сериализации
-        TaskManager saveManager = Managers.getAutoSave("src\\Memory.csv");
-
-        // + Две задачи
-        saveManager.addTask(new Task(saveManager.tickIdAndGet(), "Погулять с детьми",
-                "Давно не были на ВДНХ"));
-        saveManager.addTask(new Task(saveManager.tickIdAndGet(), "Приготовить ужин",
-                "Нужны лук, помидоры, картошка, говядина, сметана."));
-
-        // + Эпик с тремя задачами
-        saveManager.addEpic(new Epic(saveManager.tickIdAndGet(), "Поменять колёса",
-                "На этой неделе надо успеть"));
-        saveManager.addSubtask(new Subtask(saveManager.tickIdAndGet(),
-                "У Валерия насос забрать", "", saveManager.getIdCounter()-1));
-        saveManager.addSubtask(new Subtask(saveManager.tickIdAndGet(),
-                "Валерий посмотрит визг потом",
-                "Какой-то визг из под колес то появляется, то пропадает.", saveManager.getIdCounter()-2));
-        saveManager.addSubtask(new Subtask(saveManager.tickIdAndGet(),
-                "Отдать Валерию диск",
-                "Давно обещал вернуть диск с фото отдыха", saveManager.getIdCounter()-3));
-
-        // + Эпик пустой
-        saveManager.addEpic(new Epic(saveManager.tickIdAndGet(),"Съездить к маме",
-                "Обещал на 20 числа, но пришлось перенести."));
-
-        // Запросы тасков
-        saveManager.getTask(1);
-        saveManager.getEpic(3);
-        saveManager.getTask(1);
-        saveManager.getTask(2);
-        saveManager.getEpic(7);
-
-        //FileBackedTasksManager backTester = loadFromFile(new File("src\\Memory.csv"));
-        /*Когда восстанавливаешь данные из файла, их не нужно сразу записывать, поэтому нужно использовать
-        * методы без save()*/
-        InMemoryTaskManager backTester = loadFromFile(new File("src\\Memory.csv"));
-        // Выведем прочитанные данные
-        System.out.println("\n" + backTester.getTasksList());
-        System.out.println(backTester.getEpicsList());
-        System.out.println(backTester.getSubTasksList());
-        System.out.println(backTester.getHistory());
-    }
-
     public void save() { // Сохраняет текущее состояние менеджера в файл
         try (Writer fileWriter = new FileWriter(file)) {
 
@@ -236,22 +193,40 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public Boolean addTask(Task task) {
         Boolean result = super.addTask(task);
-        save();
+        if (result) {
+            save();
+        }
         return result;
+    }
+
+    public Boolean addTaskWithoutSave(Task task) { // Чтобы создавать при восстановлении данных
+        return super.addTask(task);
     }
 
     @Override
     public Boolean addEpic(Epic epic) {
         Boolean result = super.addEpic(epic);
-        save();
+        if (result) {
+            save();
+        }
         return result;
+    }
+
+    public Boolean addEpicWithoutSave(Epic epic) { // Чтобы создавать при восстановлении данных
+        return super.addEpic(epic);
     }
 
     @Override
     public Boolean addSubtask(Subtask subtask) {
         Boolean result = super.addSubtask(subtask);
-        save();
+        if (result) {
+            save();
+        }
         return result;
+    }
+
+    public Boolean addSubtaskWithoutSave(Subtask subtask) { // Чтобы создавать при восстановлении данных
+        return super.addSubtask(subtask);
     }
 
     @Override
@@ -296,42 +271,54 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public Boolean deleteTask(Integer taskId) {
         Boolean result = super.deleteTask(taskId);
-        save();
+        if (result) {
+            save();
+        }
         return result;
     }
 
     @Override
     public Boolean deleteEpic(Integer epicId) {
         Boolean result = super.deleteEpic(epicId);
-        save();
+        if (result) {
+            save();
+        }
         return result;
     }
 
     @Override
     public Boolean deleteSubTask(Integer subTaskId) {
         Boolean result = super.deleteSubTask(subTaskId);
-        save();
+        if (result) {
+            save();
+        }
         return result;
     }
 
     @Override
     public Boolean updateTask(Integer taskId, Task task) { // Обновление задачи
         Boolean result = super.updateTask(taskId, task);
-        save();
+        if (result) {
+            save();
+        }
         return result;
     }
 
     @Override
     public Boolean updateEpic(Integer epicId, Epic epic) { // Обновление эпика
         Boolean result = super.updateEpic(epicId, epic);
-        save();
+        if (result) {
+            save();
+        }
         return result;
     }
 
     @Override
     public Boolean updateSubtask(Integer subtaskId, Subtask subtask) { // Обновление подзадачи
         Boolean result = super.updateSubtask(subtaskId, subtask);
-        save();
+        if (result) {
+            save();
+        }
         return result;
     }
 }

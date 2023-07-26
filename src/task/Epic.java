@@ -24,9 +24,10 @@ public class Epic extends Task {
     @Override
     public String toString() {
         return "Epic{" +
-                "title='" + this.getTitle() + '\'' +
-                ", status='" + this.getStatus() + '\'' +
-                ", subTasks=" + subTasksId.size() +
+                "id='" + getId() + '\'' +
+                ", title='" + getTitle() + '\''+
+                ", subTasksId=" + subTasksId +
+                ", status='" + getStatus() + '\''+
                 '}';
     }
 
@@ -144,7 +145,6 @@ public class Epic extends Task {
                 }
             }
         }
-
 
         for (Integer subtaskID : getSubTasksId()) {
             if (subTasksId.contains(subtaskID)) { // Смотрим только принадлежащие этому эпику подзадачи

@@ -7,8 +7,8 @@ public class Managers {
 
     private Managers () {}
 
-    public static TaskManager getDefault(String path) throws IOException, InterruptedException {
-        return new HttpTaskManager(path);
+    public static TaskManager getDefault(String URIOfDataServer) throws IOException, InterruptedException {
+        return new HttpTaskManager(URIOfDataServer);
     }
 
     public static TaskManager getWithoutSave() {

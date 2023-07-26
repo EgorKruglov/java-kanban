@@ -32,7 +32,7 @@ public class KVServer {
 		try {
 			System.out.println("\n/load");
 			if (!hasAuth(h)) {
-				System.out.println("Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
+				System.out.println("Запрос не авторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
 				h.sendResponseHeaders(403, 0);
 				return;
 			}
@@ -43,15 +43,16 @@ public class KVServer {
 					h.sendResponseHeaders(400, 0);
 					return;
 				}
-				if (!data.containsKey(key)) {
-					System.out.println("Значение с ключом " + key + " не найдено");
-					h.sendResponseHeaders(400, 0);
-					return;
+
+				String response = "[]";
+				if (data.containsKey(key)) {
+					response = data.get(key);
 				}
-				sendText(h, data.get(key));
-				System.out.println("Значение для ключа " + key + " успешно обновлено!");
+
+				sendText(h, response);
+				System.out.println("Значение для ключа " + key + " успешно отправлено!");
 			} else {
-				System.out.println("/save ждёт POST-запрос, а получил: " + h.getRequestMethod());
+				System.out.println("/save ждёт GET-запрос, а получил: " + h.getRequestMethod());
 				h.sendResponseHeaders(405, 0);
 			}
 		} finally {
@@ -68,6 +69,7 @@ public class KVServer {
 				return;
 			}
 			if ("POST".equals(h.getRequestMethod())) {
+				System.out.println(h.getRequestURI().getPath());
 				String key = h.getRequestURI().getPath().substring("/save/".length());
 				if (key.isEmpty()) {
 					System.out.println("Key для сохранения пустой. key указывается в пути: /save/{key}");
@@ -82,6 +84,7 @@ public class KVServer {
 				}
 				data.put(key, value);
 				System.out.println("Значение для ключа " + key + " успешно обновлено!");
+				System.out.println(data);
 				h.sendResponseHeaders(200, 0);
 			} else {
 				System.out.println("/save ждёт POST-запрос, а получил: " + h.getRequestMethod());

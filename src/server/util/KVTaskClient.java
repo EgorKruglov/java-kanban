@@ -1,4 +1,4 @@
-package server;
+package server.util;
 
 import java.io.IOException;
 import java.net.URI;
@@ -52,7 +52,6 @@ public class KVTaskClient {
     }
 
     private String getApiToken() throws IOException, InterruptedException {
-
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create(uri + "/register"))
