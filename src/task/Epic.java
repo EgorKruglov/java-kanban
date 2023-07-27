@@ -9,11 +9,11 @@ import java.util.Objects;
 public class Epic extends Task {
 
     private LocalDateTime endTime;
-
-    private List<Integer> subTasksId = new ArrayList<>();    // Эпик хранит только Id своих подзадач.
+    private List<Integer> subTasksId;    // Эпик хранит только Id своих подзадач.
 
     public Epic(Integer id, String title, String description) {
         super(id, title, description);
+        subTasksId = new ArrayList<>();
     }
     /*Ещё один конструктор не нужен так как при сериализации эпик расчитывается сам*/
 /*    public Epic(Integer id, String title, String description, Status status, Integer duration, LocalDateTime startTime, LocalDateTime endTime) {

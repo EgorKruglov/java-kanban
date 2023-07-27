@@ -25,8 +25,8 @@ public class HttpTaskServer {
 
     private static final int PORT = 8080;
     private final HttpServer server;
-    TaskManager manager;
-    Gson gson;
+    private final TaskManager manager;
+    private final Gson gson;
 
     public HttpTaskServer() throws IOException, InterruptedException {
         manager = Managers.getDefault("http://localhost:8078");
@@ -343,7 +343,7 @@ public class HttpTaskServer {
                         return;
                     }
 
-                    if (!manager.updateTask(id, jsonSubtask)) {
+                    if (!manager.updateSubtask(id, jsonSubtask)) {
                         writeResponse(h, "Подзадача не обновлена. Проверьте id, id эпика и " +
                                 "незанятость периода времени другими задачами.", 400);
                         return;
@@ -372,7 +372,7 @@ public class HttpTaskServer {
                     try {
                         subtask = manager.getSubtask(id);
                     } catch (NullPointerException e) {
-                        writeResponse(h, "Задачи с id=" + id + " не найдено", 400);
+                        writeResponse(h, "Подзадачи с id=" + id + " не найдено", 400);
                         return;
                     }
                     writeResponse(h, gson.toJson(subtask), 200);
@@ -427,5 +427,9 @@ public class HttpTaskServer {
         System.out.println("Запускаем сервер на порту " + PORT);
         System.out.println("http://localhost:" + PORT + "/\n");
         server.start();
+    }
+
+    public void stop() {
+        server.stop(0);
     }
 }

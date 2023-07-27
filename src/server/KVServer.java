@@ -17,9 +17,10 @@ public class KVServer {
 	public static final int PORT = 8078;
 	private final String apiToken;
 	private final HttpServer server;
-	private final Map<String, String> data = new HashMap<>();
+	private final Map<String, String> data;
 
 	public KVServer() throws IOException {
+		data = new HashMap<>();
 		apiToken = generateApiToken();
 		server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
 		server.createContext("/register", this::register);
@@ -28,7 +29,6 @@ public class KVServer {
 	}
 
 	private void load(HttpExchange h) throws IOException {
-		// TODO Добавьте получение значения по ключу
 		try {
 			System.out.println("\n/load");
 			if (!hasAuth(h)) {
@@ -114,6 +114,10 @@ public class KVServer {
 		System.out.println("Открой в браузере http://localhost:" + PORT + "/");
 		System.out.println("API_TOKEN: " + apiToken);
 		server.start();
+	}
+
+	public void stop() {
+		server.stop(0);
 	}
 
 	private String generateApiToken() {

@@ -1,10 +1,10 @@
 package manager;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import server.util.KVTaskClient;
@@ -13,24 +13,20 @@ import task.Epic;
 import task.Subtask;
 import task.Task;
 
-import java.awt.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
 public class HttpTaskManager extends FileBackedTasksManager {
 
-    KVTaskClient client;
-    Gson gson;
+    private final KVTaskClient client;
+    private final Gson gson;
 
     public HttpTaskManager(String uri) throws IOException, InterruptedException {
         client = new KVTaskClient(uri);
-
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter());
         gson = gsonBuilder.create();
-
         loadData(); // Восстановление менеджера
     }
 
@@ -61,9 +57,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
 
             JsonArray jsonArray = JsonParser.parseString(response).getAsJsonArray();
             for (JsonElement jsonElement : jsonArray) {
-
                 Epic epic = gson.fromJson(jsonElement, Epic.class);
-
                 epic.setSubTasksId(new ArrayList<>());
                 this.addEpicWithoutSave(epic);
             }
@@ -98,8 +92,16 @@ public class HttpTaskManager extends FileBackedTasksManager {
             }
 
             JsonArray jsonArray = JsonParser.parseString(response).getAsJsonArray();
-            for (int i = 0; i < jsonArray.size(); i++) {
-                this.addInHistory(gson.fromJson(jsonArray.get(i), Task.class));
+            for (JsonElement jsonElement : jsonArray) {
+                JsonObject jsonObject = jsonElement.getAsJsonObject();
+                /* Определяем тип по характерным полям */
+                if (jsonObject.get("subTasksId") != null) {
+                    this.addInHistory(gson.fromJson(jsonElement, Epic.class));
+                } else if (jsonObject.get("epicId") != null) {
+                    this.addInHistory(gson.fromJson(jsonElement, Subtask.class));
+                } else {
+                    this.addInHistory(gson.fromJson(jsonElement, Task.class));
+                }
             }
 
             System.out.println("История успешно загружена");

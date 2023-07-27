@@ -1,7 +1,7 @@
 package tests;
 
 import manager.FileBackedTasksManager;
-import manager.InMemoryTaskManager;
+import manager.TaskManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
 
-    InMemoryTaskManager resultManager;
+    TaskManager resultManager;
 
     @BeforeEach
     @Override
@@ -60,31 +60,31 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         createTask1();
         manager.getTask(task1Id);
         loadToResultManager();
-        assertEquals(List.of(task1), manager.getHistory());
+        assertEquals(List.of(task1), resultManager.getHistory());
 
         createEpic();
         manager.getEpic(epicId);
         loadToResultManager();
-        assertEquals(List.of(task1, epic), manager.getHistory());
+        assertEquals(List.of(task1, epic), resultManager.getHistory());
 
         createSubtask1();
         manager.getSubtask(subtask1Id);
         loadToResultManager();
-        assertEquals(List.of(task1, epic, subtask1), manager.getHistory());
+        assertEquals(List.of(task1, epic, subtask1), resultManager.getHistory());
 
         createSubtask2();
         manager.getSubtask(subtask2Id);
         loadToResultManager();
-        assertEquals(List.of(task1, epic, subtask1, subtask2), manager.getHistory());
+        assertEquals(List.of(task1, epic, subtask1, subtask2), resultManager.getHistory());
 
         manager.getSubtask(subtask1Id); // Тест вызова уже созданных задач
         manager.getEpic(epicId);
         manager.addTask(task1);
         loadToResultManager();
-        assertEquals(List.of(task1, epic, subtask1, subtask2), manager.getHistory()); // Задачи ви истории стоят по возрастания id
+        assertEquals(List.of(task1, epic, subtask1, subtask2), resultManager.getHistory()); // Задачи ви истории стоят по возрастания id
     }
 
-    private void loadToResultManager() {
+    public void loadToResultManager() {
         resultManager = FileBackedTasksManager.loadFromFile(new File("src\\Memory.csv"));
     }
 }

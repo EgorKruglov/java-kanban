@@ -1,7 +1,11 @@
 package manager;                    // Класс для сериализации
 
 import extraExceptions.ManagerSaveException;
-import task.*;
+import task.Epic;
+import task.Status;
+import task.Subtask;
+import task.Task;
+import task.TaskName;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -95,7 +99,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public static InMemoryTaskManager loadFromFile(File file) {
 
-        //FileBackedTasksManager backTester = new FileBackedTasksManager(file);
         InMemoryTaskManager backTester = new InMemoryTaskManager();
 
         int idCounter = 0;  // Счётчик-идентификатор для задач

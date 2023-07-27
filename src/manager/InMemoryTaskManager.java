@@ -7,7 +7,13 @@ import task.Subtask;
 import task.Task;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeSet;
 
 public class InMemoryTaskManager implements TaskManager {  // Этот класс хранит задачи в оперативной памяти
     private Integer idCounter;  // Счётчик-идентификатор для задач

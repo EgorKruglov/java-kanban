@@ -8,15 +8,13 @@ import java.net.http.HttpResponse;
 
 public class KVTaskClient {
     private final String uri;
-    private final HttpClient client = HttpClient.newHttpClient();
+    private final HttpClient client;
     private final HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
     private final String apiToken;
 
     public KVTaskClient(String uri) throws IOException, InterruptedException {
         this.uri = uri;
-
-
-        //this.saveUri = this.uri + ""
+        client  = HttpClient.newHttpClient();
         this.apiToken = getApiToken();
     }
 
